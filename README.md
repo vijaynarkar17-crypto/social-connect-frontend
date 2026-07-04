@@ -1,17 +1,21 @@
 # Social Connect — Frontend
 
-React + TypeScript + Vite app for Social Connect.
+Standalone React + TypeScript + Vite app.
 
-**GitHub:** [social-connect-frontend](https://github.com/vijaynarkar17-crypto/social-connect-frontend)
+**Repository:** [social-connect-frontend](https://github.com/vijaynarkar17-crypto/social-connect-frontend)
+
+This is an **independent project**. Open this folder alone in your editor — not the parent directory.
 
 ## Requirements
 
 - Node.js 18+
-- Backend API running on `http://localhost:4000` ([social-connect-backend](https://github.com/vijaynarkar17-crypto/social-connect-backend))
+- A running Social Connect API (default `http://localhost:4000`)
 
-## Quick start
+## Setup
 
 ```powershell
+git clone https://github.com/vijaynarkar17-crypto/social-connect-frontend.git
+cd social-connect-frontend
 npm install
 copy .env.example .env
 npm run dev
@@ -19,23 +23,31 @@ npm run dev
 
 Open **http://localhost:5173**
 
-Vite proxies `/api`, `/uploads`, and `/socket.io` to the backend — you do **not** need `VITE_API_URL` for local dev.
+## Local API
+
+For development, Vite proxies `/api`, `/uploads`, and `/socket.io` to `http://localhost:4000`. Start the backend separately in its own project folder.
 
 ## Scripts
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start dev server (port 5173) |
-| `npm run build` | Production build → `dist/` |
+| `npm run dev` | Dev server (port 5173) |
+| `npm run build` | Production build |
 | `npm run preview` | Preview production build |
 
 ## Environment
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `VITE_API_URL` | No (local) | API base URL for production builds |
-| `VITE_GOOGLE_CLIENT_ID` | Optional | Google sign-in button |
+| `VITE_API_URL` | Production only | Full API URL when not using Vite proxy |
+| `VITE_GOOGLE_CLIENT_ID` | Optional | Google sign-in |
 
-## Repo layout
+## Git
 
-This folder is its own Git repo. The backend lives in a separate repo. For local full-stack dev, use the parent workspace (`socialconnect/`) and run `npm run dev` from there to start both servers.
+```powershell
+git add .
+git commit -m "your message"
+git push origin main
+```
+
+Only commit from **this folder**. Do not mix frontend and backend in one repo.

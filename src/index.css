@@ -21,6 +21,11 @@
       radial-gradient(ellipse 80% 50% at 20% -10%, rgb(var(--mesh-1, 124 58 237) / 0.1), transparent),
       radial-gradient(ellipse 60% 40% at 90% 0%, rgb(var(--mesh-2, 59 130 246) / 0.08), transparent);
     background-attachment: fixed;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  body::-webkit-scrollbar {
+    display: none;
   }
   ::selection { @apply bg-primary/20; }
 }
@@ -42,3 +47,14 @@
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 }
+
+@layer utilities {
+  * {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
