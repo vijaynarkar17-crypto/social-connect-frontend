@@ -9,6 +9,7 @@ import NewChatSheet, { type ChatContact } from '@/components/messages/NewChatShe
 import MessageContextMenu, { type MessageMenuAnchor } from '@/components/messages/MessageContextMenu';
 import MessageShareSheet from '@/components/messages/MessageShareSheet';
 import api from '@/lib/api';
+import { ConversationListSkeleton, ChatThreadSkeleton } from '@/components/ui/Skeleton';
 import { formatInboxPreview } from '@/lib/messageContent';
 import { postMessageAsStory } from '@/lib/messageActions';
 import { useSwipeRightAction, useSwipeLeftAction } from '@/hooks/useEdgeSwipe';
@@ -59,6 +60,8 @@ interface MessagesPanelProps {
   initialPartner?: Partner | null;
 }
 
+const THREAD_PAGE_SIZE = 20;
+
 export default function MessagesPanel({
   active,
   onBack,
@@ -70,6 +73,8 @@ export default function MessagesPanel({
   const [selected, setSelected] = useState<Partner | null>(initialPartner || null);
   const [messages, setMessages] = useState<ChatMessageData[]>([]);
   const [threadLoading, setThreadLoading] = useState(false);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const [hasMoreOlder, setHasMoreOlder] = useState(false);
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
   const [newChatOpen, setNewChatOpen] = useState(false);
@@ -85,6 +90,8 @@ export default function MessagesPanel({
   const [shareMessage, setShareMessage] = useState<ChatMessageData | null>(null);
   const [actionFeedback, setActionFeedback] = useState('');
   const threadEndRef = useRef<HTMLDivElement>(null);
+  const threadScrollRef = useRef<HTMLDivElement>(null);
+  const loadingOlderRef = useRef(false);
 
   const swipeBack = useSwipeRightAction(onBack, active && !selected);
   const swipeToClips = useSwipeLeftAction(
@@ -124,20 +131,62 @@ export default function MessagesPanel({
   const loadThread = useCallback(async (partnerId: string) => {
     setThreadLoading(true);
     setSendError('');
+    setHasMoreOlder(false);
+    setMessages([]);
     try {
       const [{ data: thread }, { data: access }] = await Promise.all([
-        api.get(`/api/messages/with/${partnerId}`),
+        api.get(`/api/messages/with/${partnerId}`, { params: { limit: THREAD_PAGE_SIZE } }),
         api.get(`/api/messages/can-chat/${partnerId}`),
       ]);
       setMessages(thread.messages || []);
+      setHasMoreOlder(Boolean(thread.hasMore));
       setChatAccess(access);
+      requestAnimationFrame(() => {
+        threadEndRef.current?.scrollIntoView({ behavior: 'auto' });
+      });
     } catch {
       setMessages([]);
       setChatAccess(null);
+      setHasMoreOlder(false);
     } finally {
       setThreadLoading(false);
     }
   }, []);
+
+  const loadOlderMessages = useCallback(async () => {
+    if (!selected || !hasMoreOlder || loadingOlderRef.current || threadLoading || messages.length === 0) {
+      return;
+    }
+
+    const scrollEl = threadScrollRef.current;
+    const prevHeight = scrollEl?.scrollHeight ?? 0;
+    const prevTop = scrollEl?.scrollTop ?? 0;
+
+    loadingOlderRef.current = true;
+    setLoadingOlder(true);
+    try {
+      const { data } = await api.get(`/api/messages/with/${selected.id}`, {
+        params: { limit: THREAD_PAGE_SIZE, before: messages[0].id },
+      });
+      const older: ChatMessageData[] = data.messages || [];
+      if (older.length === 0) {
+        setHasMoreOlder(false);
+        return;
+      }
+      setMessages((prev) => [...older, ...prev]);
+      setHasMoreOlder(Boolean(data.hasMore));
+      requestAnimationFrame(() => {
+        if (scrollEl) {
+          scrollEl.scrollTop = scrollEl.scrollHeight - prevHeight + prevTop;
+        }
+      });
+    } catch {
+      // keep current messages
+    } finally {
+      loadingOlderRef.current = false;
+      setLoadingOlder(false);
+    }
+  }, [selected, hasMoreOlder, threadLoading, messages]);
 
   useEffect(() => {
     if (active) loadConversations();
@@ -152,12 +201,15 @@ export default function MessagesPanel({
     else {
       setMessages([]);
       setChatAccess(null);
+      setHasMoreOlder(false);
     }
   }, [selected, loadThread]);
 
-  useEffect(() => {
-    threadEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  const handleThreadScroll = () => {
+    const el = threadScrollRef.current;
+    if (!el || loadingOlderRef.current || !hasMoreOlder) return;
+    if (el.scrollTop < 72) loadOlderMessages();
+  };
 
   const handleSend = async () => {
     if (!selected || !draft.trim() || sending) return;
@@ -172,6 +224,9 @@ export default function MessagesPanel({
       setDraft('');
       setChatAccess((prev) => (prev ? { ...prev, canChat: true } : prev));
       loadConversations();
+      requestAnimationFrame(() => {
+        threadEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      });
     } catch (err: unknown) {
       const code = (err as { response?: { data?: { code?: string; error?: string } } })?.response?.data;
       if (code?.code === 'CHAT_REQUEST_REQUIRED') {
@@ -215,6 +270,7 @@ export default function MessagesPanel({
   const startChat = (user: Partner | ChatContact) => {
     setSelected(user);
     setMessages([]);
+    setHasMoreOlder(false);
   };
 
   const showFeedback = (text: string) => {
@@ -358,9 +414,7 @@ export default function MessagesPanel({
 
           <div className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain">
             {loading ? (
-              <div className="flex justify-center py-12">
-                <div className="w-7 h-7 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-              </div>
+              <ConversationListSkeleton />
             ) : conversations.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
                 <MessageCircle className="w-12 h-12 text-gray-300 mb-3" />
@@ -436,11 +490,18 @@ export default function MessagesPanel({
             </div>
           </div>
 
-          <div className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain px-4 py-3 space-y-3">
-            {threadLoading ? (
-              <div className="flex justify-center py-8">
-                <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <div
+            ref={threadScrollRef}
+            onScroll={handleThreadScroll}
+            className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain px-4 py-3 space-y-3"
+          >
+            {loadingOlder && (
+              <div className="flex justify-center py-1">
+                <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               </div>
+            )}
+            {threadLoading ? (
+              <ChatThreadSkeleton />
             ) : messages.length === 0 ? (
               <div className="text-center py-10 px-4">
                 {chatAccess?.isPublic ? (

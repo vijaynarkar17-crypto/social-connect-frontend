@@ -254,7 +254,13 @@ export default function ProfilePage() {
                 action={profile.isOwnProfile ? { label: 'Create a clip →', to: '/clips' } : { label: 'Explore Clips →', to: '/clips' }}
               />
             ) : (
-              clips.map((clip) => <ClipCard key={clip.id} clip={clip} />)
+              clips.map((clip) => (
+                <ClipCard
+                  key={clip.id}
+                  clip={clip}
+                  onDeleted={() => setClips((prev) => prev.filter((c) => c.id !== clip.id))}
+                />
+              ))
             )
           )}
 

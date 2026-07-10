@@ -36,10 +36,25 @@ const typeConfig: Record<NotificationType, { icon: typeof Heart; color: string; 
   SHARE: { icon: Share2, color: 'text-teal-500', bg: 'bg-teal-500/10' },
 };
 
+function getFollowActionPath(n: Notification): string | null {
+  if (!n.actor?.id) return null;
+  const params = new URLSearchParams();
+  if (n.actor.username) params.set('username', n.actor.username);
+  params.set('notificationId', n.id);
+  if (n.type === 'FOLLOW') params.set('type', 'follow');
+  return `/notifications/follow/${n.actor.id}?${params.toString()}`;
+}
+
 function getNotificationPath(n: Notification): string | null {
   const { actor, type, targetId, targetType } = n;
 
-  if (type === 'FOLLOW_REQUEST' && n.followRequestPending) return null;
+  if (type === 'FOLLOW_REQUEST' && n.followRequestPending) {
+    return getFollowActionPath(n);
+  }
+
+  if (type === 'FOLLOW' && actor?.id) {
+    return getFollowActionPath(n);
+  }
 
   if (type === 'MESSAGE') {
     if (actor?.id && actor.username) {
@@ -63,7 +78,6 @@ export default function NotificationsPage() {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const load = () => {
     api.get('/api/notifications')
@@ -84,33 +98,17 @@ export default function NotificationsPage() {
   };
 
   const handleClick = async (n: Notification) => {
-    if (n.type === 'FOLLOW_REQUEST' && n.followRequestPending) return;
+    const path = getNotificationPath(n);
+    if (!path) return;
 
     await markRead(n.id);
-    const path = getNotificationPath(n);
-    if (path) navigate(path);
-  };
 
-  const acceptFollow = async (n: Notification, followBack: boolean) => {
-    if (!n.actor?.id) return;
-    const key = `${n.id}-${followBack ? 'back' : 'accept'}`;
-    setActionLoading(key);
-    try {
-      const endpoint = followBack
-        ? `/api/users/follow-requests/${n.actor.id}/follow-back`
-        : `/api/users/follow-requests/${n.actor.id}/accept`;
-      await api.post(endpoint);
-      await markRead(n.id);
-      setNotifications((prev) =>
-        prev.map((item) =>
-          item.id === n.id
-            ? { ...item, read: true, followRequestPending: false, message: 'is now following you', type: 'FOLLOW' }
-            : item
-        )
-      );
-    } finally {
-      setActionLoading(null);
+    if (path.startsWith('/notifications/follow/')) {
+      navigate(path, { state: { notification: n } });
+      return;
     }
+
+    navigate(path);
   };
 
   const unread = notifications.filter((n) => !n.read).length;
@@ -138,7 +136,6 @@ export default function NotificationsPage() {
             {notifications.map((n) => {
               const cfg = typeConfig[n.type] || typeConfig.LIKE;
               const Icon = cfg.icon;
-              const showFollowActions = n.type === 'FOLLOW_REQUEST' && n.followRequestPending && n.actor;
               const path = getNotificationPath(n);
               const isClickable = !!path;
 
@@ -167,31 +164,12 @@ export default function NotificationsPage() {
                       {n.message}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">{formatDistanceToNow(n.createdAt)}</p>
-
-                    {showFollowActions && (
-                      <div className="flex flex-wrap gap-2 mt-3" onClick={(e) => e.stopPropagation()}>
-                        <Button
-                          size="sm"
-                          onClick={() => acceptFollow(n, false)}
-                          loading={actionLoading === `${n.id}-accept`}
-                          disabled={!!actionLoading}
-                        >
-                          Accept
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => acceptFollow(n, true)}
-                          loading={actionLoading === `${n.id}-back`}
-                          disabled={!!actionLoading}
-                        >
-                          Follow back
-                        </Button>
-                      </div>
-                    )}
+                    {(n.type === 'FOLLOW_REQUEST' && n.followRequestPending) || n.type === 'FOLLOW' ? (
+                      <p className="text-xs text-primary mt-1">Tap to accept or follow back</p>
+                    ) : null}
                   </div>
 
-                  {!n.read && !showFollowActions && (
+                  {!n.read && (
                     <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-2" />
                   )}
                 </div>

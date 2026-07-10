@@ -12,3 +12,69 @@ export function PostCardSkeleton() {
     </div>
   );
 }
+
+export function ConversationListSkeleton({ rows = 8 }: { rows?: number }) {
+  return (
+    <ul className="divide-y divide-gray-100 dark:divide-gray-800">
+      {Array.from({ length: rows }).map((_, i) => (
+        <li key={i} className="flex items-center gap-3 px-4 py-3">
+          <Skeleton className="w-11 h-11 rounded-full shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="flex justify-between gap-2">
+              <Skeleton className="h-3.5 w-28" />
+              <Skeleton className="h-2.5 w-8" />
+            </div>
+            <Skeleton className="h-3 w-full max-w-[220px]" />
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export function ChatThreadSkeleton({ rows = 6 }: { rows?: number }) {
+  return (
+    <div className="space-y-4 px-1">
+      {Array.from({ length: rows }).map((_, i) => {
+        const mine = i % 3 === 2;
+        return (
+          <div key={i} className={clsx('flex', mine ? 'justify-end' : 'justify-start')}>
+            <Skeleton
+              className={clsx(
+                'h-10 rounded-2xl',
+                mine ? 'w-[58%] rounded-br-md' : 'w-[52%] rounded-bl-md'
+              )}
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export function AppLoadingSkeleton() {
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-surface-dark flex flex-col">
+      <div className="shrink-0 border-b border-gray-200/80 dark:border-gray-800/80 px-4 py-3 flex items-center justify-between">
+        <Skeleton className="h-7 w-32" />
+        <div className="flex gap-2">
+          <Skeleton className="w-9 h-9 rounded-full" />
+          <Skeleton className="w-9 h-9 rounded-full" />
+        </div>
+      </div>
+      <div className="flex-1 max-w-2xl w-full mx-auto p-4 space-y-4">
+        <PostCardSkeleton />
+        <PostCardSkeleton />
+        <div className="glass-card p-4 space-y-3">
+          <Skeleton className="h-4 w-2/3" />
+          <Skeleton className="h-48 w-full rounded-2xl" />
+        </div>
+      </div>
+      <div className="shrink-0 border-t border-gray-200/80 dark:border-gray-800/80 px-6 py-3 flex justify-around">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="w-8 h-8 rounded-lg" />
+        ))}
+      </div>
+    </div>
+  );
+}

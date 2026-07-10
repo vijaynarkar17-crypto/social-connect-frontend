@@ -99,6 +99,7 @@ export default function SavedPage() {
                   clip={item as Clip}
                   defaultSaved
                   onSaveChange={(saved) => handleSaveChange(item.id, saved)}
+                  onDeleted={() => setItems((prev) => prev.filter((p) => p.id !== item.id))}
                 />
               ) : (
                 <PostCard

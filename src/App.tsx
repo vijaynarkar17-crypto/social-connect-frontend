@@ -16,6 +16,7 @@ import SavedPage from '@/pages/SavedPage';
 import SettingsPage from '@/pages/SettingsPage';
 import SearchPage from '@/pages/SearchPage';
 import NotificationsPage from '@/pages/NotificationsPage';
+import FollowRequestPage from '@/pages/FollowRequestPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 
 export default function App() {
@@ -44,6 +45,7 @@ export default function App() {
               <Route path="/saved" element={<SavedPage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/notifications" element={<NotificationsPage />} />
+              <Route path="/notifications/follow/:userId" element={<FollowRequestPage />} />
             </Route>
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
