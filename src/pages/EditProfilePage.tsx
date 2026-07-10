@@ -5,7 +5,7 @@ import Avatar from '@/components/ui/Avatar';
 import Button from '@/components/ui/Button';
 import ChatBox from '@/components/ui/ChatBox';
 import { useAuth } from '@/context/AuthContext';
-import api, { uploadFile } from '@/lib/api';
+import api, { uploadFile, resolveAssetUrl } from '@/lib/api';
 
 export default function EditProfilePage() {
   const { user, refreshUser } = useAuth();
@@ -43,7 +43,20 @@ export default function EditProfilePage() {
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Cover Image</label>
+            {cover && (
+              <div className="mb-3 h-32 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800">
+                <img
+                  src={resolveAssetUrl(cover)}
+                  alt="Cover preview"
+                  className="w-full h-full object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+              </div>
+            )}
             <Button size="sm" variant="secondary" onClick={() => coverRef.current?.click()}>Change Cover</Button>
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
+              If your photo disappeared after deploy, upload it again — files are now saved permanently.
+            </p>
             <input ref={coverRef} type="file" accept="image/*" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; if (f) setCover(await uploadFile(f, 'covers')); }} />
           </div>
           <div>

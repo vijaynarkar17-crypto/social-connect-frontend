@@ -8,8 +8,15 @@ export function apiUrl(path: string): string {
 }
 export function resolveAssetUrl(url?: string | null): string | undefined {
   if (!url) return undefined;
-  if (/^https?:\/\//i.test(url)) return url;
-  if (url.startsWith('/')) return `${API_BASE}${url}`;
+
+  const storedPath = url.startsWith('/')
+    ? url
+    : url.match(/(\/(?:api\/files\/[a-f0-9]{24}|uploads\/[^\s?#]+))/i)?.[1];
+
+  if (storedPath) {
+    return API_BASE ? `${API_BASE}${storedPath}` : storedPath;
+  }
+
   return url;
 }
 
@@ -69,5 +76,5 @@ export async function uploadFile(file: File, folder = 'posts') {
   form.append('file', file);
   form.append('folder', folder);
   const { data } = await api.post('/api/posts/upload', form);
-  return resolveAssetUrl(data.url as string) || (data.url as string);
+  return data.url as string;
 }
