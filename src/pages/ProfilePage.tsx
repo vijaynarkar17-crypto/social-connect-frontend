@@ -7,7 +7,7 @@ import Button from '@/components/ui/Button';
 import ProfileOptionsMenu from '@/components/profile/ProfileOptionsMenu';
 import PostCard, { type Post } from '@/components/feed/PostCard';
 import ClipCard, { type Clip } from '@/components/clips/ClipCard';
-import api from '@/lib/api';
+import api, { resolveAssetUrl } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { formatCount } from '@/lib/postUtils';
 
@@ -131,7 +131,7 @@ export default function ProfilePage() {
       <div className="space-y-4 -mx-4 md:mx-0">
         {/* Cover */}
         <div className="relative h-40 md:h-48 bg-gradient-accent rounded-b-2xl overflow-hidden">
-          {profile.cover && <img src={profile.cover} alt="" className="w-full h-full object-cover" />}
+          {profile.cover && <img src={resolveAssetUrl(profile.cover)} alt="" className="w-full h-full object-cover" />}
           {profile.isOwnProfile ? (
             <Link
               to="/settings"

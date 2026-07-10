@@ -2,6 +2,17 @@ import axios from 'axios';
 
 export const API_BASE = import.meta.env.VITE_API_URL || '';
 
+/** Build a full API path — works locally (empty base) and in production. */
+export function apiUrl(path: string): string {
+  return `${API_BASE}${path}`;
+}
+export function resolveAssetUrl(url?: string | null): string | undefined {
+  if (!url) return undefined;
+  if (/^https?:\/\//i.test(url)) return url;
+  if (url.startsWith('/')) return `${API_BASE}${url}`;
+  return url;
+}
+
 const api = axios.create({
   baseURL: API_BASE,
   withCredentials: true,

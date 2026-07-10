@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Clapperboard, ImageIcon, Film } from 'lucide-react';
+import { resolveAssetUrl } from '@/lib/api';
 
 const GIF_URL_RE = /(https?:\/\/(?:media\.giphy\.com|media\.tenor\.com|i\.giphy\.com)[^\s]+)/i;
 
@@ -87,7 +88,7 @@ export function SharedPostCard({
   const label = sharedPostLabel(post.type);
   const href = post.type === 'clip' ? '/clips' : '/home';
   const isVideo = post.type === 'clip' || post.type === 'video';
-  const media = post.media?.[0];
+  const media = resolveAssetUrl(post.media?.[0]);
 
   return (
     <Link

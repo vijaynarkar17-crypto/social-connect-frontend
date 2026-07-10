@@ -6,7 +6,7 @@ import Avatar from '@/components/ui/Avatar';
 import ChatBox from '@/components/ui/ChatBox';
 import PostMenu from '@/components/feed/PostMenu';
 import ShareSheet from '@/components/ui/ShareSheet';
-import api from '@/lib/api';
+import api, { resolveAssetUrl } from '@/lib/api';
 import { formatDistanceToNow } from '@/lib/utils';
 import { formatCount } from '@/lib/postUtils';
 import { renderMessageContent } from '@/lib/messageContent';
@@ -169,9 +169,9 @@ export default function PostCard({
       {post.media?.[0] && (
         <div className="relative rounded-xl overflow-hidden mb-3 -mx-1">
           {post.type === 'video' ? (
-            <video src={post.media[0]} controls className="w-full object-cover max-h-96 bg-black" />
+            <video src={resolveAssetUrl(post.media[0])} controls className="w-full object-cover max-h-96 bg-black" />
           ) : (
-            <img src={post.media[0]} alt="" className="w-full object-cover max-h-96" />
+            <img src={resolveAssetUrl(post.media[0])} alt="" className="w-full object-cover max-h-96" />
           )}
           {tags.length > 0 && (
             <div className="absolute bottom-3 left-3 flex flex-wrap gap-1.5 max-w-[80%]">

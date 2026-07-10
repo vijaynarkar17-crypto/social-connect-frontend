@@ -4,7 +4,7 @@ import { Heart, MessageCircle, Share2, Music2, Play, Pause, Bookmark, X } from '
 import Avatar from '@/components/ui/Avatar';
 import ChatBox from '@/components/ui/ChatBox';
 import ShareSheet from '@/components/ui/ShareSheet';
-import api from '@/lib/api';
+import api, { resolveAssetUrl } from '@/lib/api';
 import { formatCount } from '@/lib/postUtils';
 import { renderMessageContent } from '@/lib/messageContent';
 
@@ -138,7 +138,7 @@ export default function ClipCard({
       {clip.media[0] ? (
         <video
           ref={videoRef}
-          src={clip.media[0]}
+          src={resolveAssetUrl(clip.media[0])}
           loop
           playsInline
           muted={false}
