@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Image as ImageIcon, Video, Circle, Send } from 'lucide-react';
+import { Image as ImageIcon, Video, Circle, Send, Music2 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Avatar from '@/components/ui/Avatar';
 import Button from '@/components/ui/Button';
@@ -23,6 +23,7 @@ export default function CreatePost({
   const { user } = useAuth();
   const [content, setContent] = useState('');
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [postType, setPostType] = useState<'text' | 'image' | 'video' | 'story'>('text');
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -34,7 +35,7 @@ export default function CreatePost({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const composeRef = useRef<HTMLDivElement>(null);
 
-  const showActions = expanded || !!content.trim() || !!mediaUrl;
+  const showActions = expanded || !!content.trim() || !!mediaUrl || !!audioUrl;
 
   useEffect(() => {
     if (!expandTrigger) return;
@@ -96,8 +97,23 @@ export default function CreatePost({
     }
   };
 
+  const handleAudio = async (file: File) => {
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      form.append('folder', 'audio');
+      const { data } = await api.post('/api/posts/upload', form);
+      setAudioUrl(data.url);
+      setPostType('text');
+      setMediaUrl(null);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async () => {
-    if (!content.trim() && !mediaUrl) return;
+    if (!content.trim() && !mediaUrl && !audioUrl) return;
     setLoading(true);
     try {
       const type = mediaUrl ? postType : 'text';
@@ -106,10 +122,11 @@ export default function CreatePost({
         type,
         content: content.trim(),
         media: mediaUrl ? [mediaUrl] : [],
-        ...(isDailyVibe ? { dailyVibe: true } : {}),
+        ...(isDailyVibe ? { dailyVibe: true, ...(audioUrl ? { audio: audioUrl } : {}) } : {}),
       });
       setContent('');
       setMediaUrl(null);
+      setAudioUrl(null);
       setPostType('text');
       setExpanded(false);
       onCreated?.();
@@ -121,7 +138,7 @@ export default function CreatePost({
   const handleBlur = () => {
     setTimeout(() => {
       if (!composeRef.current?.contains(document.activeElement)) {
-        if (!content.trim() && !mediaUrl) setExpanded(false);
+        if (!content.trim() && !mediaUrl && !audioUrl) setExpanded(false);
       }
     }, 150);
   };
@@ -147,7 +164,7 @@ export default function CreatePost({
             onChange={handleContentChange}
             onFocus={() => setExpanded(true)}
             onBlur={handleBlur}
-            placeholder="Share your vibe... text-only, auto-deletes in 24h ✨"
+            placeholder="Share your vibe... text or music, auto-deletes in 24h ✨"
             multiline
             rows={showActions ? 2 : 1}
             variant="plain"
@@ -166,6 +183,19 @@ export default function CreatePost({
                   <span className="text-sm font-medium">@{u.username}</span>
                 </button>
               ))}
+            </div>
+          )}
+          {audioUrl && (
+            <div className="relative mt-2 flex items-center gap-2 p-3 rounded-xl bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800/40">
+              <Music2 className="w-4 h-4 text-purple-500 shrink-0" />
+              <audio src={resolveAssetUrl(audioUrl)} controls className="flex-1 h-8" />
+              <button
+                type="button"
+                onClick={() => setAudioUrl(null)}
+                className="bg-black/50 text-white rounded-full w-6 h-6 text-xs shrink-0"
+              >
+                ×
+              </button>
             </div>
           )}
           {mediaUrl && (
@@ -240,6 +270,24 @@ export default function CreatePost({
               >
                 <Circle className="w-4 h-4" /> Story
               </button>
+              <button
+                type="button"
+                title="Add music to Daily Vibe (auto-deletes in 24h)"
+                onClick={() => {
+                  const a = document.createElement('input');
+                  a.type = 'file';
+                  a.accept = 'audio/*';
+                  a.onchange = (e) => {
+                    const f = (e.target as HTMLInputElement).files?.[0];
+                    if (f) handleAudio(f);
+                  };
+                  a.click();
+                }}
+                disabled={uploading || !!mediaUrl}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-sm text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 active:scale-95 transition-transform disabled:opacity-40"
+              >
+                <Music2 className="w-4 h-4" /> Music
+              </button>
               <input
                 ref={fileRef}
                 type="file"
@@ -251,7 +299,7 @@ export default function CreatePost({
                 }}
               />
             </div>
-            <Button size="sm" onClick={handleSubmit} loading={loading || uploading} disabled={!content.trim() && !mediaUrl}>
+            <Button size="sm" onClick={handleSubmit} loading={loading || uploading} disabled={!content.trim() && !mediaUrl && !audioUrl}>
               <Send className="w-4 h-4" /> Post
             </Button>
           </div>

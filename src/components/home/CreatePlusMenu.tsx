@@ -58,7 +58,7 @@ const OPTIONS = [
   {
     id: 'vibe',
     label: 'Daily Vibe',
-    desc: 'Text · auto-deletes 24h',
+    desc: 'Text or music · auto-deletes 24h',
     icon: Sparkles,
     gradient: 'from-amber-500 to-pink-500',
     action: 'onDailyVibe' as const,

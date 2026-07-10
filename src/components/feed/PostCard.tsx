@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, MessageCircle, Share2, Bookmark } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Bookmark, Music2 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Avatar from '@/components/ui/Avatar';
 import ChatBox from '@/components/ui/ChatBox';
@@ -31,6 +31,7 @@ export interface Post {
   visibility?: string;
   expiresAt?: string;
   dailyVibe?: boolean;
+  audio?: string;
   author: { username: string; avatar?: string; isVerified?: boolean };
   taggedUsers?: TaggedUser[];
 }
@@ -164,6 +165,13 @@ export default function PostCard({
 
       {postContent && (
         <p className="text-sm mb-3 whitespace-pre-wrap">{renderMessageContent(postContent)}</p>
+      )}
+
+      {post.dailyVibe && post.audio && (
+        <div className="flex items-center gap-2 mb-3 p-3 rounded-xl bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800/40">
+          <Music2 className="w-4 h-4 text-purple-500 shrink-0" />
+          <audio src={resolveAssetUrl(post.audio)} controls className="flex-1 h-8" />
+        </div>
       )}
 
       {post.media?.[0] && (
