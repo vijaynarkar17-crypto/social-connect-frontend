@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import { resolveAssetUrl } from '@/lib/api';
 
@@ -9,9 +9,14 @@ export default function Avatar({ src, alt = '', size = 'md', className }: { src?
   const resolvedSrc = resolveAssetUrl(src);
   const [broken, setBroken] = useState(false);
 
+  useEffect(() => {
+    setBroken(false);
+  }, [resolvedSrc]);
+
   if (resolvedSrc && !broken) {
     return (
       <img
+        key={resolvedSrc}
         src={resolvedSrc}
         alt={alt}
         loading="lazy"

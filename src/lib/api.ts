@@ -9,11 +9,18 @@ export function apiUrl(path: string): string {
 export function resolveAssetUrl(url?: string | null): string | undefined {
   if (!url) return undefined;
 
+  // Dead ephemeral paths from old Render disk uploads
+  if (url.includes('/uploads/')) {
+    // Only usable in local dev when API_BASE is empty (Vite proxy)
+    if (API_BASE) return undefined;
+  }
+
   const storedPath = url.startsWith('/')
     ? url
     : url.match(/(\/(?:api\/files\/[a-f0-9]{24}|uploads\/[^\s?#]+))/i)?.[1];
 
   if (storedPath) {
+    if (API_BASE && storedPath.startsWith('/uploads/')) return undefined;
     return API_BASE ? `${API_BASE}${storedPath}` : storedPath;
   }
 

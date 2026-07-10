@@ -88,12 +88,14 @@ export default function EditProfilePage() {
                 }}
               />
             </div>
-            <p className="text-xs text-gray-500 mt-2">Saved permanently to your account.</p>
+            <p className="text-xs text-gray-500 mt-2">
+              Saved permanently in the database (survives redeploys).
+            </p>
           </div>
           <div>
             <label className="block text-sm font-medium mb-2">Cover Image</label>
             <div className="mb-3 h-32 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800">
-              {cover ? (
+              {cover && resolveAssetUrl(cover) ? (
                 <img
                   src={resolveAssetUrl(cover)}
                   alt="Cover preview"
@@ -101,7 +103,9 @@ export default function EditProfilePage() {
                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-accent" />
+                <div className="w-full h-full bg-gradient-accent flex items-center justify-center text-white/80 text-xs">
+                  No cover yet — tap Change Cover
+                </div>
               )}
             </div>
             <Button
@@ -112,7 +116,9 @@ export default function EditProfilePage() {
             >
               {uploadingCover ? 'Saving…' : 'Change Cover'}
             </Button>
-            <p className="text-xs text-gray-500 mt-2">Saved permanently to your account.</p>
+            <p className="text-xs text-gray-500 mt-2">
+              Saved permanently in the database (survives redeploys).
+            </p>
             <input
               ref={coverRef}
               type="file"
