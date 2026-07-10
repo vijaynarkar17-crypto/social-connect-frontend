@@ -78,3 +78,10 @@ export async function uploadFile(file: File, folder = 'posts') {
   const { data } = await api.post('/api/posts/upload', form);
   return data.url as string;
 }
+
+export async function uploadProfileImage(file: File, type: 'avatar' | 'cover') {
+  const form = new FormData();
+  form.append('file', file);
+  const { data } = await api.post(`/api/users/me/${type}`, form);
+  return data as { url: string; user: { avatar?: string; cover?: string } };
+}
