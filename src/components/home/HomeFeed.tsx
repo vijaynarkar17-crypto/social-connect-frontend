@@ -176,14 +176,25 @@ export default function HomeFeed({ cameraEnabled = true, onSwipeToMessages }: Ho
   }, []);
 
   useEffect(() => {
+    const isStaleVibe = (p: Post) => {
+      if (p.type === 'image' || p.type === 'video' || p.type === 'clip') return false;
+      if (p.dailyVibe && isPostExpired(p.expiresAt)) return true;
+      // Text Daily Vibes older than 24h (legacy posts without expiresAt)
+      if ((p.type === 'text' || p.dailyVibe) && p.createdAt) {
+        const age = Date.now() - new Date(p.createdAt).getTime();
+        if (age > 24 * 60 * 60 * 1000) return true;
+      }
+      return false;
+    };
     const tick = () => {
       setPosts((prev) => {
-        const next = prev.filter((p) => !(p.dailyVibe && isPostExpired(p.expiresAt)));
+        const next = prev.filter((p) => !isStaleVibe(p));
         if (next.length !== prev.length) loadPosts(true);
         return next;
       });
     };
-    const id = window.setInterval(tick, 60_000);
+    tick();
+    const id = window.setInterval(tick, 30_000);
     return () => window.clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
