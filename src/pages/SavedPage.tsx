@@ -1,8 +1,8 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Bookmark, Grid3X3, Video } from 'lucide-react';
 import AppShell from '@/components/layout/AppShell';
-import PostCard, { Post } from '@/components/feed/PostCard';
-import ClipCard, { Clip } from '@/components/clips/ClipCard';
+import PostCard, { type Post } from '@/components/feed/PostCard';
+import ClipCard, { type Clip } from '@/components/clips/ClipCard';
 import api from '@/lib/api';
 
 type SavedTab = 'all' | 'posts' | 'videos';

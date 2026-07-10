@@ -9,6 +9,7 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/context/AuthContext';
 import { getApiError } from '@/lib/errors';
+import { API_BASE } from '@/lib/api';
 
 const schema = z.object({
   email: z.string().email('Invalid email'),
@@ -54,7 +55,7 @@ export default function LoginPage() {
           <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200 dark:border-gray-700" /></div>
           <div className="relative flex justify-center text-xs"><span className="bg-white dark:bg-surface-card-dark px-2 text-gray-500">or</span></div>
         </div>
-        <a href="/api/auth/google" className="block">
+        <a href={`${API_BASE}/api/auth/google`} className="block">
           <Button type="button" variant="secondary" className="w-full">Continue with Google</Button>
         </a>
         <p className="text-center text-sm text-gray-500">

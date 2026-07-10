@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  X, Circle, Image as ImageIcon, Video, Clapperboard, Sparkles, Upload, Camera,
+  X, Circle, Image as ImageIcon, Clapperboard, Sparkles, Upload, Camera,
 } from 'lucide-react';
 
 interface CreatePlusMenuProps {

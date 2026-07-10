@@ -6,7 +6,7 @@ import Button from '@/components/ui/Button';
 
 import ChatBox from '@/components/ui/ChatBox';
 
-import ClipCard, { Clip } from '@/components/clips/ClipCard';
+import ClipCard, { type Clip } from '@/components/clips/ClipCard';
 
 import { useAuth } from '@/context/AuthContext';
 

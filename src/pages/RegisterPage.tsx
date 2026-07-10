@@ -10,6 +10,7 @@ import Button from '@/components/ui/Button';
 import { useAuth } from '@/context/AuthContext';
 import { getPasswordStrength } from '@/lib/utils';
 import { getApiError } from '@/lib/errors';
+import { API_BASE } from '@/lib/api';
 
 const schema = z.object({
   email: z.string().email('Invalid email'),
@@ -53,7 +54,7 @@ export default function RegisterPage() {
           )}
         </div>
         <Button type="submit" className="w-full" loading={isSubmitting}>Create Account</Button>
-        <a href="/api/auth/google" className="block"><Button type="button" variant="secondary" className="w-full">Continue with Google</Button></a>
+        <a href={`${API_BASE}/api/auth/google`} className="block"><Button type="button" variant="secondary" className="w-full">Continue with Google</Button></a>
         <p className="text-center text-sm text-gray-500">Already have an account? <Link to="/login" className="text-primary hover:underline">Sign in</Link></p>
       </motion.form>
     </AuthLayout>

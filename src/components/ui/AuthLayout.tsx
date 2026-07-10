@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import Logo from './Logo';
 import { Sparkles, Users, MessageCircle, Shield } from 'lucide-react';

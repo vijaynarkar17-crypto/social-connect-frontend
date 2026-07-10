@@ -28,7 +28,7 @@ export default function ChatMessageBubble({
 }) {
   const bubbleRef = useRef<HTMLDivElement>(null);
   const { isMine, content, sharedPost } = message;
-  const timerRef = useRef<number>();
+  const timerRef = useRef<number | undefined>(undefined);
   const movedRef = useRef(false);
 
   const isBoilerplateShare = /^Sent you a (reel|clip|post|story|video|photo)$/i.test(content.trim());

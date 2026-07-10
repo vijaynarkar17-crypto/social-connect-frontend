@@ -6,8 +6,8 @@ import api from '@/lib/api';
 import {
   STORY_MODES,
   STORY_EFFECTS,
-  StoryMode,
-  StoryEffect,
+  type StoryMode,
+  type StoryEffect,
   getFilterForMode,
   buildCollageImage,
 } from '@/lib/storyCamera';

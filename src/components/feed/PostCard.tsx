@@ -54,7 +54,7 @@ export default function PostCard({
   const [comments, setComments] = useState<{ id: string; content: string; author: { username: string; avatar?: string } }[]>([]);
   const [commentText, setCommentText] = useState('');
   const [saved, setSaved] = useState(defaultSaved);
-  const [shared, setShared] = useState(false);
+  const [, setShared] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
   const [postContent, setPostContent] = useState(post.content);
   const [visibility, setVisibility] = useState(post.visibility || 'public');

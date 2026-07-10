@@ -7,7 +7,7 @@ import StoryRing from '@/components/feed/StoryRing';
 import StoryCamera, { type CameraPurpose } from '@/components/feed/StoryCamera';
 import CreatePost from '@/components/feed/CreatePost';
 import CreatePlusMenu from '@/components/home/CreatePlusMenu';
-import PostCard, { Post } from '@/components/feed/PostCard';
+import PostCard, { type Post } from '@/components/feed/PostCard';
 import { PostCardSkeleton } from '@/components/ui/Skeleton';
 import Button from '@/components/ui/Button';
 import ChatBox from '@/components/ui/ChatBox';
