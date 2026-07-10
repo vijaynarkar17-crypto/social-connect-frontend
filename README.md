@@ -42,6 +42,20 @@ For development, Vite proxies `/api`, `/uploads`, and `/socket.io` to `http://lo
 | `VITE_API_URL` | Production only | Full API URL when not using Vite proxy |
 | `VITE_GOOGLE_CLIENT_ID` | Optional | Google sign-in |
 
+## Production (Vercel)
+
+In **Vercel → Settings → Environment Variables**:
+
+| Key | Value |
+|-----|--------|
+| `VITE_API_URL` | `https://social-connect-backend-t9nh.onrender.com` |
+
+- No trailing slash
+- Apply to **Production** (and Preview if needed)
+- **Redeploy** after saving — Vite bakes env vars at build time
+
+On **Render**, set `FRONTEND_URL` to your Vercel URL (e.g. `https://social-connect-frontend-pi.vercel.app`).
+
 ## Git
 
 ```powershell
