@@ -5,7 +5,7 @@ import Avatar from '@/components/ui/Avatar';
 import Button from '@/components/ui/Button';
 import ChatBox from '@/components/ui/ChatBox';
 import { useAuth } from '@/context/AuthContext';
-import api from '@/lib/api';
+import api, { resolveAssetUrl } from '@/lib/api';
 
 interface MentionUser {
   id: string;
@@ -171,9 +171,9 @@ export default function CreatePost({
           {mediaUrl && (
             <div className="relative mt-2 rounded-xl overflow-hidden max-h-64">
               {postType === 'video' ? (
-                <video src={mediaUrl} controls className="w-full object-cover max-h-64" />
+                <video src={resolveAssetUrl(mediaUrl)} controls className="w-full object-cover max-h-64" />
               ) : (
-                <img src={mediaUrl} alt="Preview" className="w-full object-cover" />
+                <img src={resolveAssetUrl(mediaUrl)} alt="Preview" className="w-full object-cover" loading="lazy" />
               )}
               {content.match(/@[a-zA-Z0-9_]+/g) && (
                 <div className="absolute bottom-2 left-2 flex flex-wrap gap-1">

@@ -171,7 +171,7 @@ export default function PostCard({
           {post.type === 'video' ? (
             <video src={resolveAssetUrl(post.media[0])} controls className="w-full object-cover max-h-96 bg-black" />
           ) : (
-            <img src={resolveAssetUrl(post.media[0])} alt="" className="w-full object-cover max-h-96" />
+            <img src={resolveAssetUrl(post.media[0])} alt="" className="w-full object-cover max-h-96" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
           )}
           {tags.length > 0 && (
             <div className="absolute bottom-3 left-3 flex flex-wrap gap-1.5 max-w-[80%]">

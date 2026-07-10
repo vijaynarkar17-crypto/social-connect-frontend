@@ -16,7 +16,7 @@ export function resolveAssetUrl(url?: string | null): string | undefined {
 const api = axios.create({
   baseURL: API_BASE,
   withCredentials: true,
-  timeout: 15000,
+  timeout: 30000,
 });
 
 let refreshing = false;
@@ -69,5 +69,5 @@ export async function uploadFile(file: File, folder = 'posts') {
   form.append('file', file);
   form.append('folder', folder);
   const { data } = await api.post('/api/posts/upload', form);
-  return data.url as string;
+  return resolveAssetUrl(data.url as string) || (data.url as string);
 }

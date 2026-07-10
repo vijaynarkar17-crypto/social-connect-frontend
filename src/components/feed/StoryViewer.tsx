@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import Avatar from '@/components/ui/Avatar';
 import { useAuth } from '@/context/AuthContext';
+import { resolveAssetUrl } from '@/lib/api';
 
 interface StoryGroup {
   author: { username: string; avatar?: string; isVerified?: boolean };
@@ -35,7 +36,7 @@ export default function StoryViewer({
 
   const activeGroup = groups[groupIndex];
   const activeItem = activeGroup?.items[itemIndex];
-  const mediaUrl = activeItem?.media?.[0];
+  const mediaUrl = resolveAssetUrl(activeItem?.media?.[0]);
   const isOwnStory = activeGroup?.author?.username === user?.username;
 
   const isVideo = useMemo(() => {

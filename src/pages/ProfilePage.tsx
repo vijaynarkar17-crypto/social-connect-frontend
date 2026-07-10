@@ -131,7 +131,15 @@ export default function ProfilePage() {
       <div className="space-y-4 -mx-4 md:mx-0">
         {/* Cover */}
         <div className="relative h-40 md:h-48 bg-gradient-accent rounded-b-2xl overflow-hidden">
-          {profile.cover && <img src={resolveAssetUrl(profile.cover)} alt="" className="w-full h-full object-cover" />}
+          {profile.cover && (
+            <img
+              src={resolveAssetUrl(profile.cover)}
+              alt=""
+              className="w-full h-full object-cover"
+              loading="lazy"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
+          )}
           {profile.isOwnProfile ? (
             <Link
               to="/settings"
