@@ -61,6 +61,14 @@ export default function PostCard({
   const [visibility, setVisibility] = useState(post.visibility || 'public');
   const [deleted, setDeleted] = useState(false);
   const [expired, setExpired] = useState(() => post.dailyVibe && isPostExpired(post.expiresAt));
+  const [mediaBroken, setMediaBroken] = useState(false);
+
+  const mediaUrl = resolveAssetUrl(post.media?.[0]);
+  const showMedia = Boolean(mediaUrl) && !mediaBroken;
+
+  useEffect(() => {
+    setMediaBroken(false);
+  }, [mediaUrl]);
 
   useEffect(() => {
     if (!post.dailyVibe || !post.expiresAt) return;
@@ -120,12 +128,16 @@ export default function PostCard({
 
   if (deleted || expired) return null;
 
+  // Broken image/video posts (dead media) — don't show empty cards with stray lines
+  const isMediaPost = post.type === 'image' || post.type === 'video';
+  if (isMediaPost && !showMedia) return null;
+
   const tags = post.taggedUsers?.length
     ? post.taggedUsers
     : [...new Set((postContent.match(/@[a-zA-Z0-9_]+/g) || []))].map((t) => ({ username: t.slice(1) }));
 
   return (
-    <Card id={`post-${post.id}`} className="scroll-mt-24 transition-shadow duration-500">
+    <Card id={`post-${post.id}`} className="scroll-mt-24 transition-shadow duration-500 overflow-hidden">
       <div className="flex items-start justify-between mb-3">
         <Link to={`/profile/${post.author.username}`} className="flex items-center gap-3">
           <Avatar src={post.author.avatar} alt={post.author.username} />
@@ -174,12 +186,18 @@ export default function PostCard({
         </div>
       )}
 
-      {post.media?.[0] && (
-        <div className="relative rounded-xl overflow-hidden mb-3 -mx-1">
+      {showMedia && (
+        <div className="relative rounded-xl overflow-hidden mb-3 bg-gray-100 dark:bg-gray-800">
           {post.type === 'video' ? (
-            <video src={resolveAssetUrl(post.media[0])} controls className="w-full object-cover max-h-96 bg-black" />
+            <video src={mediaUrl} controls className="w-full object-cover max-h-96 bg-black" />
           ) : (
-            <img src={resolveAssetUrl(post.media[0])} alt="" className="w-full object-cover max-h-96" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            <img
+              src={mediaUrl}
+              alt=""
+              className="w-full object-cover max-h-96 block"
+              loading="lazy"
+              onError={() => setMediaBroken(true)}
+            />
           )}
           {tags.length > 0 && (
             <div className="absolute bottom-3 left-3 flex flex-wrap gap-1.5 max-w-[80%]">
