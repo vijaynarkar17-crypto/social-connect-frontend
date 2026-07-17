@@ -624,6 +624,15 @@ export default function ClipsFeed({ active = true, onSwipeToMessages }: ClipsFee
                       }
                     }}
 
+                    onUnavailable={() => {
+                      const next = clips.filter((c) => c.id !== clip.id);
+                      dispatch(removeClip(clip.id));
+                      const newIndex = Math.min(activeIndexRef.current, Math.max(0, next.length - 1));
+                      if (next.length > 0 && newIndex !== activeIndexRef.current) {
+                        window.setTimeout(() => scrollToIndex(newIndex, 'auto'), 0);
+                      }
+                    }}
+
                     fullscreen
 
                     isActive={activeIndex === index}

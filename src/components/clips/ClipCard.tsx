@@ -25,6 +25,7 @@ export default function ClipCard({
   clip,
   onUpdate,
   onDeleted,
+  onUnavailable,
   defaultSaved = false,
   onSaveChange,
   fullscreen = false,
@@ -34,6 +35,7 @@ export default function ClipCard({
   clip: Clip;
   onUpdate?: () => void;
   onDeleted?: () => void;
+  onUnavailable?: () => void;
   defaultSaved?: boolean;
   onSaveChange?: (saved: boolean) => void;
   fullscreen?: boolean;
@@ -152,7 +154,10 @@ export default function ClipCard({
           onClick={togglePlay}
           onPlay={() => setPlaying(true)}
           onPause={() => setPlaying(false)}
-          onError={() => setVideoError(true)}
+          onError={() => {
+            setVideoError(true);
+            onUnavailable?.();
+          }}
         />
       ) : (
         <div className="w-full h-full bg-gradient-to-br from-primary/30 via-accent/20 to-pink-500/30 flex items-center justify-center px-8 text-center text-white/70 text-sm">
