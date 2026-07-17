@@ -16,6 +16,8 @@ import { useSwipeRevealCamera } from '@/hooks/useSwipeRevealCamera';
 import { useSwipeLeftAction } from '@/hooks/useEdgeSwipe';
 import api from '@/lib/api';
 import { isPostExpired } from '@/lib/ephemeralPost';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { appendFeed, setFeed, upsertFeedPost } from '@/store/contentSlice';
 
 interface HomeFeedProps {
   cameraEnabled?: boolean;
@@ -24,12 +26,13 @@ interface HomeFeedProps {
 
 export default function HomeFeed({ cameraEnabled = true, onSwipeToMessages }: HomeFeedProps) {
   const { user } = useAuth();
+  const dispatch = useAppDispatch();
+  const posts = useAppSelector((state) => state.content.feed);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const highlightPostId = searchParams.get('post');
   const photoFileRef = useRef<HTMLInputElement>(null);
   const clipFileRef = useRef<HTMLInputElement>(null);
-  const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
   const [cameraOpen, setCameraOpen] = useState(false);
@@ -123,7 +126,8 @@ export default function HomeFeed({ cameraEnabled = true, onSwipeToMessages }: Ho
       const { data } = await api.get('/api/posts/feed', {
         params: { limit: 10, cursor: reset ? undefined : cursorRef.current },
       });
-      setPosts((prev) => (reset ? data.posts : [...prev, ...data.posts]));
+      if (reset) dispatch(setFeed(data.posts));
+      else dispatch(appendFeed(data.posts));
       cursorRef.current = data.nextCursor;
       setHasMore(data.hasMore);
     } finally {
@@ -163,11 +167,11 @@ export default function HomeFeed({ cameraEnabled = true, onSwipeToMessages }: Ho
           navigate('/clips');
           return;
         }
-        setPosts((prev) => [post, ...prev.filter((p) => p.id !== post.id)]);
+        dispatch(upsertFeedPost(post));
         scrollToPost(highlightPostId);
       })
       .catch(() => {});
-  }, [highlightPostId, loading, posts, scrollToPost, navigate]);
+  }, [highlightPostId, loading, posts, scrollToPost, navigate, dispatch]);
 
   useEffect(() => {
     cursorRef.current = null;
@@ -187,17 +191,19 @@ export default function HomeFeed({ cameraEnabled = true, onSwipeToMessages }: Ho
       return false;
     };
     const tick = () => {
-      setPosts((prev) => {
-        const next = prev.filter((p) => !isStaleVibe(p));
-        if (next.length !== prev.length) loadPosts(true);
-        return next;
-      });
+      const next = posts.filter((p) => !isStaleVibe(p));
+      if (next.length !== posts.length) {
+        dispatch(setFeed(next));
+        loadPosts(true);
+      }
     };
     tick();
     const id = window.setInterval(tick, 30_000);
     return () => window.clearInterval(id);
+    // loadPosts intentionally remains outside dependencies to avoid resetting
+    // the cleanup timer whenever pagination state changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [posts, dispatch]);
 
   useEffect(() => {
     const t = setTimeout(() => setSwipeHint(true), 2000);

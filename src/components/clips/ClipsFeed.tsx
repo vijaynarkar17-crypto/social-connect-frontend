@@ -16,6 +16,10 @@ import { withDemoFallback, isDemoClip, hasDemoClips } from '@/lib/dummyClips';
 
 import api from '@/lib/api';
 
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+
+import { removeClip, setClips } from '@/store/contentSlice';
+
 
 
 interface ClipsFeedProps {
@@ -32,6 +36,10 @@ export default function ClipsFeed({ active = true, onSwipeToMessages }: ClipsFee
 
   const { user } = useAuth();
 
+  const dispatch = useAppDispatch();
+
+  const clips = useAppSelector((state) => state.content.clips);
+
   const fileRef = useRef<HTMLInputElement>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -47,8 +55,6 @@ export default function ClipsFeed({ active = true, onSwipeToMessages }: ClipsFee
   const wheelTimerRef = useRef<number | null>(null);
 
 
-
-  const [clips, setClips] = useState<Clip[]>([]);
 
   const [usingDemo, setUsingDemo] = useState(false);
 
@@ -106,7 +112,7 @@ export default function ClipsFeed({ active = true, onSwipeToMessages }: ClipsFee
 
       const merged = withDemoFallback(fromApi);
 
-      setClips(merged);
+      dispatch(setClips(merged));
 
       setUsingDemo(fromApi.length === 0 || hasDemoClips(merged));
 
@@ -114,7 +120,7 @@ export default function ClipsFeed({ active = true, onSwipeToMessages }: ClipsFee
 
     } catch {
 
-      setClips(withDemoFallback([]));
+      dispatch(setClips(withDemoFallback([])));
 
       setUsingDemo(true);
 
@@ -128,7 +134,7 @@ export default function ClipsFeed({ active = true, onSwipeToMessages }: ClipsFee
 
     }
 
-  }, []);
+  }, [dispatch]);
 
 
 
@@ -623,14 +629,12 @@ export default function ClipsFeed({ active = true, onSwipeToMessages }: ClipsFee
                     onUpdate={() => loadClips(true)}
 
                     onDeleted={() => {
-                      setClips((prev) => {
-                        const next = prev.filter((c) => c.id !== clip.id);
-                        const newIndex = Math.min(activeIndexRef.current, Math.max(0, next.length - 1));
-                        if (next.length > 0 && newIndex !== activeIndexRef.current) {
-                          window.setTimeout(() => scrollToIndex(newIndex, 'auto'), 0);
-                        }
-                        return next;
-                      });
+                      const next = clips.filter((c) => c.id !== clip.id);
+                      dispatch(removeClip(clip.id));
+                      const newIndex = Math.min(activeIndexRef.current, Math.max(0, next.length - 1));
+                      if (next.length > 0 && newIndex !== activeIndexRef.current) {
+                        window.setTimeout(() => scrollToIndex(newIndex, 'auto'), 0);
+                      }
                     }}
 
                     fullscreen

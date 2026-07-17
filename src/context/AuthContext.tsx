@@ -1,19 +1,15 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, type ReactNode } from 'react';
 import api from '@/lib/api';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import {
+  clearAuth,
+  setAuthLoading,
+  setUser as setReduxUser,
+  type User,
+} from '@/store/authSlice';
+import { clearContent } from '@/store/contentSlice';
 
-export interface User {
-  id: string;
-  email: string;
-  username: string;
-  avatar?: string;
-  cover?: string;
-  bio?: string;
-  links?: string[];
-  theme?: 'light' | 'dark';
-  isVerified?: boolean;
-  privacy?: { profileVisibility: string; onlineStatus: string; storyVisibility?: string };
-  notificationSettings?: { likes: boolean; comments: boolean; follows: boolean; messages: boolean };
-}
+export type { User } from '@/store/authSlice';
 
 interface AuthContextType {
   user: User | null;
@@ -28,20 +24,25 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useAppDispatch();
+  const { user, loading } = useAppSelector((state) => state.auth);
+  const setUser = (nextUser: User | null) => {
+    dispatch(setReduxUser(nextUser));
+  };
 
   const refreshUser = async () => {
     try {
       const { data } = await api.get('/api/auth/me');
-      setUser(data.user);
+      dispatch(setReduxUser(data.user));
     } catch {
-      setUser(null);
+      dispatch(setReduxUser(null));
     }
   };
 
   useEffect(() => {
-    refreshUser().finally(() => setLoading(false));
+    refreshUser().finally(() => dispatch(setAuthLoading(false)));
+    // Redux dispatch is stable and this bootstrap should run only when mounted.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const login = async (email: string, password: string, remember = false) => {
@@ -50,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
       remember,
     });
-    setUser(data.user);
+    dispatch(setReduxUser(data.user));
   };
 
   const register = async (email: string, username: string, password: string) => {
@@ -59,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       username: username.trim(),
       password,
     });
-    setUser(data.user);
+    dispatch(setReduxUser(data.user));
   };
 
   const logout = async () => {
@@ -68,7 +69,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       // ignore
     }
-    setUser(null);
+    dispatch(clearAuth());
+    dispatch(clearContent());
   };
 
   return (
