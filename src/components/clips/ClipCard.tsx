@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, MessageCircle, Share2, Music2, Play, Pause, Bookmark, X } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Music2, Play, Pause, Bookmark, X, Volume2, VolumeX } from 'lucide-react';
 import Avatar from '@/components/ui/Avatar';
 import ChatBox from '@/components/ui/ChatBox';
 import ShareSheet from '@/components/ui/ShareSheet';
@@ -51,6 +51,8 @@ export default function ClipCard({
   const [comments, setComments] = useState<{ id: string; content: string; author: { username: string; avatar?: string } }[]>([]);
   const [commentText, setCommentText] = useState('');
   const [saved, setSaved] = useState(defaultSaved);
+  const [muted, setMuted] = useState(true);
+  const [videoError, setVideoError] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -138,23 +140,27 @@ export default function ClipCard({
           : 'relative aspect-[9/14] max-h-[480px] bg-black flex items-center justify-center'
       }
     >
-      {clip.media[0] ? (
+      {clip.media[0] && !videoError ? (
         <video
           ref={videoRef}
           src={resolveAssetUrl(clip.media[0])}
           loop
           playsInline
-          muted={false}
+          muted={muted}
+          preload="metadata"
           className="w-full h-full object-cover"
           onClick={togglePlay}
           onPlay={() => setPlaying(true)}
           onPause={() => setPlaying(false)}
+          onError={() => setVideoError(true)}
         />
       ) : (
-        <div className="w-full h-full bg-gradient-to-br from-primary/30 via-accent/20 to-pink-500/30" />
+        <div className="w-full h-full bg-gradient-to-br from-primary/30 via-accent/20 to-pink-500/30 flex items-center justify-center px-8 text-center text-white/70 text-sm">
+          {videoError ? 'This clip video is unavailable.' : 'No video attached.'}
+        </div>
       )}
 
-      {!playing && clip.media[0] && (
+      {!playing && clip.media[0] && !videoError && (
         <button
           type="button"
           onClick={togglePlay}
@@ -173,6 +179,17 @@ export default function ClipCard({
           className="absolute top-3 left-3 w-9 h-9 rounded-full bg-black/40 flex items-center justify-center text-white"
         >
           <Pause className="w-4 h-4" />
+        </button>
+      )}
+
+      {!videoError && clip.media[0] && (
+        <button
+          type="button"
+          onClick={() => setMuted((value) => !value)}
+          className="absolute top-3 right-3 z-20 w-9 h-9 rounded-full bg-black/40 flex items-center justify-center text-white"
+          aria-label={muted ? 'Unmute clip' : 'Mute clip'}
+        >
+          {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
         </button>
       )}
 

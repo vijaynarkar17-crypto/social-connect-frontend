@@ -12,8 +12,6 @@ import { useAuth } from '@/context/AuthContext';
 
 import { useSwipeRightAction } from '@/hooks/useEdgeSwipe';
 
-import { withDemoFallback, isDemoClip, hasDemoClips } from '@/lib/dummyClips';
-
 import api from '@/lib/api';
 
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -55,8 +53,6 @@ export default function ClipsFeed({ active = true, onSwipeToMessages }: ClipsFee
   const wheelTimerRef = useRef<number | null>(null);
 
 
-
-  const [usingDemo, setUsingDemo] = useState(false);
 
   const [loading, setLoading] = useState(true);
 
@@ -110,19 +106,13 @@ export default function ClipsFeed({ active = true, onSwipeToMessages }: ClipsFee
 
       const fromApi: Clip[] = (data.clips || []).filter((c: Clip) => c.media?.[0]);
 
-      const merged = withDemoFallback(fromApi);
-
-      dispatch(setClips(merged));
-
-      setUsingDemo(fromApi.length === 0 || hasDemoClips(merged));
+      dispatch(setClips(fromApi));
 
       if (isRefresh) setActiveIndex(0);
 
     } catch {
 
-      dispatch(setClips(withDemoFallback([])));
-
-      setUsingDemo(true);
+      dispatch(setClips([]));
 
     } finally {
 
@@ -488,18 +478,6 @@ export default function ClipsFeed({ active = true, onSwipeToMessages }: ClipsFee
 
 
 
-        {usingDemo && !loading && (
-
-          <div className="absolute top-2 left-1/2 -translate-x-1/2 z-30 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur text-white text-[10px] font-medium pointer-events-none">
-
-            Demo clips · swipe up/down · pull down on first to refresh
-
-          </div>
-
-        )}
-
-
-
         {user && !loading && (
 
           <button
@@ -606,6 +584,15 @@ export default function ClipsFeed({ active = true, onSwipeToMessages }: ClipsFee
 
             >
 
+              {clips.length === 0 && (
+                <div className="h-full flex flex-col items-center justify-center px-8 text-center text-white">
+                  <p className="text-lg font-semibold">No clips yet</p>
+                  <p className="mt-1 text-sm text-white/60">
+                    Upload a video with the + button to share the first clip.
+                  </p>
+                </div>
+              )}
+
               {clips.map((clip, index) => (
 
                 <div
@@ -641,7 +628,7 @@ export default function ClipsFeed({ active = true, onSwipeToMessages }: ClipsFee
 
                     isActive={activeIndex === index}
 
-                    demo={isDemoClip(clip.id)}
+                    demo={false}
 
                   />
 
