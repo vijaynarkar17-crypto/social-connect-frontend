@@ -23,6 +23,18 @@ export default function MainHubPage() {
   const panel = useMemo(() => panelFromPath(location.pathname), [location.pathname]);
   const panelIndex = PANEL_INDEX[panel];
 
+  // Only mount a panel once it has been visited. Avoids loading MessagesPanel +
+  // ClipsFeed (and their data) on the initial /home render.
+  const [mounted, setMounted] = useState<Record<HubPanel, boolean>>(() => ({
+    home: panel === 'home',
+    messages: panel === 'messages',
+    clips: panel === 'clips',
+  }));
+
+  useEffect(() => {
+    setMounted((prev) => (prev[panel] ? prev : { ...prev, [panel]: true }));
+  }, [panel]);
+
   const chatUserId = searchParams.get('userId');
   const chatUsername = searchParams.get('username');
   const [initialPartner, setInitialPartner] = useState<{
@@ -67,24 +79,30 @@ export default function MainHubPage() {
           transition={{ type: 'spring', damping: 32, stiffness: 320 }}
         >
           <div className="w-1/3 shrink-0 h-full min-h-0 overflow-hidden flex flex-col">
-            <HomeFeed
-              cameraEnabled={panel === 'home'}
-              onSwipeToMessages={() => goTo('messages')}
-            />
+            {mounted.home && (
+              <HomeFeed
+                cameraEnabled={panel === 'home'}
+                onSwipeToMessages={() => goTo('messages')}
+              />
+            )}
           </div>
           <div className="w-1/3 shrink-0 h-full min-h-0 overflow-hidden flex flex-col">
-            <MessagesPanel
-              active={panel === 'messages'}
-              onBack={() => goTo('home')}
-              onSwipeToClips={() => goTo('clips')}
-              initialPartner={initialPartner}
-            />
+            {mounted.messages && (
+              <MessagesPanel
+                active={panel === 'messages'}
+                onBack={() => goTo('home')}
+                onSwipeToClips={() => goTo('clips')}
+                initialPartner={initialPartner}
+              />
+            )}
           </div>
           <div className="w-1/3 shrink-0 h-full min-h-0 flex flex-col">
-            <ClipsFeed
-              active={panel === 'clips'}
-              onSwipeToMessages={() => goTo('messages')}
-            />
+            {mounted.clips && (
+              <ClipsFeed
+                active={panel === 'clips'}
+                onSwipeToMessages={() => goTo('messages')}
+              />
+            )}
           </div>
         </motion.div>
       </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, MessageCircle, Share2, Bookmark, Music2 } from 'lucide-react';
 import Card from '@/components/ui/Card';
@@ -36,7 +36,7 @@ export interface Post {
   taggedUsers?: TaggedUser[];
 }
 
-export default function PostCard({
+function PostCard({
   post,
   defaultSaved = false,
   onSaveChange,
@@ -326,3 +326,5 @@ function ActionBtn({
     </button>
   );
 }
+
+export default memo(PostCard);

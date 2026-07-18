@@ -52,6 +52,23 @@ export function ChatThreadSkeleton({ rows = 6 }: { rows?: number }) {
   );
 }
 
+export function NotificationListSkeleton({ rows = 7 }: { rows?: number }) {
+  return (
+    <div className="glass-card divide-y divide-gray-100 dark:divide-gray-800 !p-0 overflow-hidden">
+      {Array.from({ length: rows }).map((_, i) => (
+        <div key={i} className="flex items-start gap-3 p-4">
+          <Skeleton className="w-10 h-10 rounded-xl shrink-0" />
+          <Skeleton className="w-8 h-8 rounded-full shrink-0" />
+          <div className="flex-1 space-y-2 pt-0.5">
+            <Skeleton className="h-3.5 w-3/4" />
+            <Skeleton className="h-2.5 w-16" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function ProfilePageSkeleton() {
   return (
     <div className="space-y-4 -mx-4 md:mx-0 animate-pulse">

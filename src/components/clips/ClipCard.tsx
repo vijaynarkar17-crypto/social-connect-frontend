@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { memo, useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, MessageCircle, Share2, Music2, Play, Pause, Bookmark, X, Volume2, VolumeX } from 'lucide-react';
 import Avatar from '@/components/ui/Avatar';
@@ -21,7 +21,7 @@ export interface Clip {
   author: { username: string; avatar?: string; isVerified?: boolean };
 }
 
-export default function ClipCard({
+function ClipCard({
   clip,
   onUpdate,
   onDeleted,
@@ -365,3 +365,5 @@ function ActionBtn({
     </button>
   );
 }
+
+export default memo(ClipCard);

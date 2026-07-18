@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, type ReactNode } from 'react';
 import api from '@/lib/api';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
@@ -9,6 +9,7 @@ import {
 } from '@/store/authSlice';
 import { clearContent } from '@/store/contentSlice';
 import { clearProfiles } from '@/store/profileSlice';
+import { selectAuthLoading, selectAuthUser } from '@/store/selectors';
 
 export type { User } from '@/store/authSlice';
 
@@ -26,19 +27,24 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const dispatch = useAppDispatch();
-  const { user, loading } = useAppSelector((state) => state.auth);
-  const setUser = (nextUser: User | null) => {
-    dispatch(setReduxUser(nextUser));
-  };
+  const user = useAppSelector(selectAuthUser);
+  const loading = useAppSelector(selectAuthLoading);
 
-  const refreshUser = async () => {
+  const setUser = useCallback(
+    (nextUser: User | null) => {
+      dispatch(setReduxUser(nextUser));
+    },
+    [dispatch]
+  );
+
+  const refreshUser = useCallback(async () => {
     try {
       const { data } = await api.get('/api/auth/me');
       dispatch(setReduxUser(data.user));
     } catch {
       dispatch(setReduxUser(null));
     }
-  };
+  }, [dispatch]);
 
   useEffect(() => {
     refreshUser().finally(() => dispatch(setAuthLoading(false)));
@@ -46,25 +52,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const login = async (email: string, password: string, remember = false) => {
-    const { data } = await api.post('/api/auth/login', {
-      email: email.trim().toLowerCase(),
-      password,
-      remember,
-    });
-    dispatch(setReduxUser(data.user));
-  };
+  const login = useCallback(
+    async (email: string, password: string, remember = false) => {
+      const { data } = await api.post('/api/auth/login', {
+        email: email.trim().toLowerCase(),
+        password,
+        remember,
+      });
+      dispatch(setReduxUser(data.user));
+    },
+    [dispatch]
+  );
 
-  const register = async (email: string, username: string, password: string) => {
-    const { data } = await api.post('/api/auth/register', {
-      email: email.trim().toLowerCase(),
-      username: username.trim(),
-      password,
-    });
-    dispatch(setReduxUser(data.user));
-  };
+  const register = useCallback(
+    async (email: string, username: string, password: string) => {
+      const { data } = await api.post('/api/auth/register', {
+        email: email.trim().toLowerCase(),
+        username: username.trim(),
+        password,
+      });
+      dispatch(setReduxUser(data.user));
+    },
+    [dispatch]
+  );
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await api.post('/api/auth/logout');
     } catch {
@@ -73,13 +85,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     dispatch(clearAuth());
     dispatch(clearContent());
     dispatch(clearProfiles());
-  };
+  }, [dispatch]);
 
-  return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser, setUser }}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({ user, loading, login, register, logout, refreshUser, setUser }),
+    [user, loading, login, register, logout, refreshUser, setUser]
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

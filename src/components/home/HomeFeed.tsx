@@ -18,6 +18,7 @@ import api from '@/lib/api';
 import { isPostExpired } from '@/lib/ephemeralPost';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { appendFeed, setFeed, upsertFeedPost } from '@/store/contentSlice';
+import { selectFeed } from '@/store/selectors';
 
 interface HomeFeedProps {
   cameraEnabled?: boolean;
@@ -27,7 +28,7 @@ interface HomeFeedProps {
 export default function HomeFeed({ cameraEnabled = true, onSwipeToMessages }: HomeFeedProps) {
   const { user } = useAuth();
   const dispatch = useAppDispatch();
-  const posts = useAppSelector((state) => state.content.feed);
+  const posts = useAppSelector(selectFeed);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const highlightPostId = searchParams.get('post');

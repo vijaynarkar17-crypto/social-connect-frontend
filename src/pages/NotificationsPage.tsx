@@ -8,6 +8,7 @@ import Avatar from '@/components/ui/Avatar';
 import Button from '@/components/ui/Button';
 import api from '@/lib/api';
 import { formatDistanceToNow } from '@/lib/utils';
+import { NotificationListSkeleton } from '@/components/ui/Skeleton';
 
 type NotificationType = 'LIKE' | 'COMMENT' | 'FOLLOW' | 'FOLLOW_REQUEST' | 'MESSAGE' | 'MENTION' | 'TAG' | 'MUTUAL' | 'STORY_VIEW' | 'SHARE';
 
@@ -124,7 +125,7 @@ export default function NotificationsPage() {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-16"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>
+          <NotificationListSkeleton />
         ) : notifications.length === 0 ? (
           <div className="glass-card p-12 text-center">
             <Bell className="w-12 h-12 text-gray-300 mx-auto mb-3" />

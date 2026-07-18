@@ -17,6 +17,7 @@ import api from '@/lib/api';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 
 import { removeClip, setClips } from '@/store/contentSlice';
+import { selectClips } from '@/store/selectors';
 
 
 
@@ -36,7 +37,7 @@ export default function ClipsFeed({ active = true, onSwipeToMessages }: ClipsFee
 
   const dispatch = useAppDispatch();
 
-  const clips = useAppSelector((state) => state.content.clips);
+  const clips = useAppSelector(selectClips);
 
   const fileRef = useRef<HTMLInputElement>(null);
 

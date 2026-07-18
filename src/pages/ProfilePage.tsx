@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Settings, UserPlus, MessageCircle, Grid3X3, Clapperboard, AtSign } from 'lucide-react';
 import AppShell from '@/components/layout/AppShell';
@@ -18,6 +18,7 @@ import {
   setProfileRefreshing,
   type ProfileUser,
 } from '@/store/profileSlice';
+import { makeSelectProfile, makeSelectProfileRefreshing } from '@/store/selectors';
 
 type ProfileTab = 'posts' | 'clips' | 'tags';
 
@@ -41,8 +42,10 @@ export default function ProfilePage() {
 
   const resolvedUsername = username || currentUser?.username;
   const cacheKey = (resolvedUsername || '').toLowerCase();
-  const cached = useAppSelector((state) => state.profile.byUsername[cacheKey]);
-  const refreshing = useAppSelector((state) => !!state.profile.refreshing[cacheKey]);
+  const selectProfile = useMemo(() => makeSelectProfile(cacheKey), [cacheKey]);
+  const selectRefreshing = useMemo(() => makeSelectProfileRefreshing(cacheKey), [cacheKey]);
+  const cached = useAppSelector(selectProfile);
+  const refreshing = useAppSelector(selectRefreshing);
 
   const profile = cached?.user ?? null;
   const posts = cached?.posts ?? [];

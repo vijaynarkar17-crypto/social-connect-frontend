@@ -2,8 +2,9 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Home, MessageCircle, Clapperboard, Search, Bell, User } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import api from '@/lib/api';
+import { getSocket, joinUserRoom } from '@/lib/socket';
 
 const bottomNav = [
   { href: '/home', icon: Home, label: 'Home' },
@@ -24,13 +25,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const isHub =
     pathname === '/home' || pathname === '/messages' || pathname === '/clips' || pathname === '/';
 
-  useEffect(() => {
-    api.get('/api/notifications')
+  const refreshNotifications = useCallback(() => {
+    api
+      .get('/api/notifications')
       .then(({ data }) => setUnreadCount(data.unreadCount || 0))
       .catch(() => {});
-  }, [pathname]);
+  }, []);
 
-  useEffect(() => {
+  const refreshMessages = useCallback(() => {
     api
       .get('/api/messages/conversations')
       .then(({ data }) => {
@@ -41,7 +43,35 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         setUnreadMessages(total);
       })
       .catch(() => {});
-  }, [pathname]);
+  }, []);
+
+  useEffect(() => {
+    refreshNotifications();
+  }, [pathname, refreshNotifications]);
+
+  useEffect(() => {
+    refreshMessages();
+  }, [pathname, refreshMessages]);
+
+  // Real-time badge updates: join the user's room and refresh counts on push.
+  useEffect(() => {
+    if (!user?.id) return;
+    const socket = getSocket();
+    const onConnect = () => joinUserRoom(user.id);
+    const onNotification = () => refreshNotifications();
+    const onMessage = () => refreshMessages();
+
+    if (socket.connected) joinUserRoom(user.id);
+    socket.on('connect', onConnect);
+    socket.on('notification', onNotification);
+    socket.on('message', onMessage);
+
+    return () => {
+      socket.off('connect', onConnect);
+      socket.off('notification', onNotification);
+      socket.off('message', onMessage);
+    };
+  }, [user?.id, refreshNotifications, refreshMessages]);
 
   const profileHref = user ? `/profile/${user.username}` : '/profile';
 
