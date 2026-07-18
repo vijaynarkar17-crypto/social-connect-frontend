@@ -48,13 +48,13 @@ In **Vercel → Settings → Environment Variables**:
 
 | Key | Value |
 |-----|--------|
-| `VITE_API_URL` | `https://social-connect-backend-t9nh.onrender.com` |
+| `VITE_API_URL` | `https://your-api.onrender.com` |
 
 - No trailing slash
 - Apply to **Production** (and Preview if needed)
 - **Redeploy** after saving — Vite bakes env vars at build time
 
-On **Render**, set `FRONTEND_URL` to your Vercel URL (e.g. `https://social-connect-frontend-pi.vercel.app`).
+On **Render**, set `FRONTEND_URL` to your Vercel URL (e.g. `https://your-app.vercel.app`).
 
 ## Git
 
