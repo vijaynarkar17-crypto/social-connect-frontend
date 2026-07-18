@@ -5,14 +5,15 @@ import LoadingScreen from '@/components/ui/LoadingScreen';
 export function ProtectedRoute() {
   const { user, loading } = useAuth();
   const location = useLocation();
-  if (loading) return <LoadingScreen />;
+  // Persisted Redux session: show the app immediately while /auth/me refreshes.
+  if (loading && !user) return <LoadingScreen />;
   if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
   return <Outlet />;
 }
 
 export function GuestRoute() {
   const { user, loading } = useAuth();
-  if (loading) return <LoadingScreen />;
+  if (loading && !user) return <LoadingScreen />;
   if (user) return <Navigate to="/home" replace />;
   return <Outlet />;
 }

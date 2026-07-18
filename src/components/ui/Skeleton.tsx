@@ -52,6 +52,41 @@ export function ChatThreadSkeleton({ rows = 6 }: { rows?: number }) {
   );
 }
 
+export function ProfilePageSkeleton() {
+  return (
+    <div className="space-y-4 -mx-4 md:mx-0 animate-pulse">
+      <Skeleton className="h-40 md:h-48 rounded-b-2xl" />
+      <div className="px-4 -mt-14 relative">
+        <div className="flex items-end gap-4">
+          <Skeleton className="w-24 h-24 rounded-full border-4 border-white dark:border-surface-dark shrink-0" />
+          <div className="flex-1 grid grid-cols-3 gap-1 rounded-2xl bg-gray-50/90 dark:bg-gray-800/60 p-1">
+            <Skeleton className="h-14 rounded-xl" />
+            <Skeleton className="h-14 rounded-xl" />
+            <Skeleton className="h-14 rounded-xl" />
+          </div>
+        </div>
+        <div className="mt-4 space-y-2">
+          <Skeleton className="h-7 w-36" />
+          <Skeleton className="h-4 w-48" />
+        </div>
+        <div className="flex gap-2 mt-4">
+          <Skeleton className="h-9 flex-1 rounded-xl" />
+          <Skeleton className="h-9 w-24 rounded-xl" />
+        </div>
+      </div>
+      <div className="flex border-b border-gray-200 dark:border-gray-800 px-2">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} className="h-10 flex-1 mx-1 rounded-none" />
+        ))}
+      </div>
+      <div className="px-4 space-y-4 pb-4">
+        <PostCardSkeleton />
+        <PostCardSkeleton />
+      </div>
+    </div>
+  );
+}
+
 export function AppLoadingSkeleton() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-surface-dark flex flex-col">

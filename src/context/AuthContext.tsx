@@ -8,6 +8,7 @@ import {
   type User,
 } from '@/store/authSlice';
 import { clearContent } from '@/store/contentSlice';
+import { clearProfiles } from '@/store/profileSlice';
 
 export type { User } from '@/store/authSlice';
 
@@ -71,6 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     dispatch(clearAuth());
     dispatch(clearContent());
+    dispatch(clearProfiles());
   };
 
   return (

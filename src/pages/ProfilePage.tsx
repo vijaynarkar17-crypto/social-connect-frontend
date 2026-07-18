@@ -7,32 +7,17 @@ import Button from '@/components/ui/Button';
 import ProfileOptionsMenu from '@/components/profile/ProfileOptionsMenu';
 import PostCard, { type Post } from '@/components/feed/PostCard';
 import ClipCard, { type Clip } from '@/components/clips/ClipCard';
+import { ProfilePageSkeleton } from '@/components/ui/Skeleton';
 import api, { resolveAssetUrl } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { formatCount } from '@/lib/postUtils';
-
-interface ChatAccess {
-  canChat: boolean;
-  needsRequest: boolean;
-  requestStatus: string;
-  isPublic: boolean;
-  pendingOutgoing?: boolean;
-}
-
-interface Profile {
-  id: string;
-  username: string;
-  avatar?: string;
-  cover?: string;
-  bio?: string;
-  isVerified?: boolean;
-  profileVisibility?: string;
-  stats: { posts: number; followers: number; following: number };
-  isFollowing?: boolean;
-  followRequestPending?: boolean;
-  isOwnProfile?: boolean;
-  chatAccess?: ChatAccess | null;
-}
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import {
+  removeProfileClip,
+  setCachedProfile,
+  setProfileRefreshing,
+  type ProfileUser,
+} from '@/store/profileSlice';
 
 type ProfileTab = 'posts' | 'clips' | 'tags';
 
@@ -42,40 +27,67 @@ const TABS: { id: ProfileTab; label: string; icon: typeof Grid3X3 }[] = [
   { id: 'tags', label: 'Tags', icon: AtSign },
 ];
 
+/** Fresh enough to skip waiting on a spinner (still refreshes in background). */
+const STALE_MS = 60_000;
+
 export default function ProfilePage() {
   const { username } = useParams<{ username: string }>();
   const { user: currentUser } = useAuth();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [clips, setClips] = useState<Clip[]>([]);
-  const [taggedPosts, setTaggedPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useAppDispatch();
   const [activeTab, setActiveTab] = useState<ProfileTab>('posts');
   const [messageLoading, setMessageLoading] = useState(false);
+  const [notFound, setNotFound] = useState(false);
 
   const resolvedUsername = username || currentUser?.username;
+  const cacheKey = (resolvedUsername || '').toLowerCase();
+  const cached = useAppSelector((state) => state.profile.byUsername[cacheKey]);
+  const refreshing = useAppSelector((state) => !!state.profile.refreshing[cacheKey]);
 
-  const load = useCallback(async () => {
+  const profile = cached?.user ?? null;
+  const posts = cached?.posts ?? [];
+  const clips = cached?.clips ?? [];
+  const taggedPosts = cached?.taggedPosts ?? [];
+  const hasCache = !!cached;
+  const isStale = !cached || Date.now() - cached.fetchedAt > STALE_MS;
+  const showSkeleton = !hasCache && (refreshing || !notFound);
+
+  const load = useCallback(
+    async () => {
+      if (!resolvedUsername) return;
+      dispatch(setProfileRefreshing({ username: resolvedUsername, refreshing: true }));
+
+      try {
+        const [profileRes, postsRes, clipsRes, taggedRes] = await Promise.all([
+          api.get(`/api/users/${resolvedUsername}`),
+          api.get(`/api/users/${resolvedUsername}/posts`),
+          api.get(`/api/users/${resolvedUsername}/clips`),
+          api.get(`/api/users/${resolvedUsername}/tagged`),
+        ]);
+        dispatch(
+          setCachedProfile({
+            username: resolvedUsername,
+            user: profileRes.data.user as ProfileUser,
+            posts: postsRes.data.posts as Post[],
+            clips: (clipsRes.data.clips || []) as Clip[],
+            taggedPosts: (taggedRes.data.posts || []) as Post[],
+          })
+        );
+        setNotFound(false);
+      } catch {
+        setNotFound((prev) => prev || !hasCache);
+      } finally {
+        dispatch(setProfileRefreshing({ username: resolvedUsername, refreshing: false }));
+      }
+    },
+    [resolvedUsername, dispatch, hasCache]
+  );
+
+  useEffect(() => {
     if (!resolvedUsername) return;
-    setLoading(true);
-    try {
-      const [profileRes, postsRes, clipsRes, taggedRes] = await Promise.all([
-        api.get(`/api/users/${resolvedUsername}`),
-        api.get(`/api/users/${resolvedUsername}/posts`),
-        api.get(`/api/users/${resolvedUsername}/clips`),
-        api.get(`/api/users/${resolvedUsername}/tagged`),
-      ]);
-      setProfile(profileRes.data.user);
-      setPosts(postsRes.data.posts);
-      setClips(clipsRes.data.clips || []);
-      setTaggedPosts(taggedRes.data.posts || []);
-    } finally {
-      setLoading(false);
-    }
+    if (!hasCache || isStale) load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resolvedUsername]);
-
-  useEffect(() => { load(); }, [load]);
 
   const handleFollow = async () => {
     if (!profile) return;
@@ -109,27 +121,38 @@ export default function ProfilePage() {
   const canMessage = chat?.canChat || chat?.isPublic;
 
   if (!resolvedUsername) {
-    return <AppShell><div className="text-center py-20 text-gray-500">Please log in</div></AppShell>;
-  }
-
-  if (loading) {
     return (
       <AppShell>
-        <div className="flex justify-center py-20">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        </div>
+        <div className="text-center py-20 text-gray-500">Please log in</div>
       </AppShell>
     );
   }
 
-  if (!profile) {
-    return <AppShell><div className="text-center py-20 text-gray-500">User not found</div></AppShell>;
+  if (showSkeleton) {
+    return (
+      <AppShell>
+        <ProfilePageSkeleton />
+      </AppShell>
+    );
+  }
+
+  if (notFound || !profile) {
+    return (
+      <AppShell>
+        <div className="text-center py-20 text-gray-500">User not found</div>
+      </AppShell>
+    );
   }
 
   return (
     <AppShell>
       <div className="space-y-4 -mx-4 md:mx-0">
-        {/* Cover */}
+        {refreshing && hasCache && (
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 z-30 px-3 py-1 rounded-full bg-black/50 text-white text-[10px] font-medium pointer-events-none">
+            Updating…
+          </div>
+        )}
+
         <div className="relative h-40 md:h-48 bg-gradient-accent rounded-b-2xl overflow-hidden">
           {profile.cover && (
             <img
@@ -137,7 +160,9 @@ export default function ProfilePage() {
               alt=""
               className="w-full h-full object-cover"
               loading="lazy"
-              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
             />
           )}
           {profile.isOwnProfile ? (
@@ -154,7 +179,6 @@ export default function ProfilePage() {
           ) : null}
         </div>
 
-        {/* Profile header */}
         <div className="px-4 -mt-14 relative">
           <div className="flex items-end gap-4">
             <Avatar
@@ -165,8 +189,16 @@ export default function ProfilePage() {
             />
             <div className="flex-1 min-w-0 grid grid-cols-3 gap-1 rounded-2xl bg-gray-50/90 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60 p-1">
               <StatBtn label="Posts" count={profile.stats.posts} onClick={() => setActiveTab('posts')} />
-              <StatBtn label="Followers" count={profile.stats.followers} onClick={() => navigate(`/followers/${profile.username}`)} />
-              <StatBtn label="Following" count={profile.stats.following} onClick={() => navigate(`/following/${profile.username}`)} />
+              <StatBtn
+                label="Followers"
+                count={profile.stats.followers}
+                onClick={() => navigate(`/followers/${profile.username}`)}
+              />
+              <StatBtn
+                label="Following"
+                count={profile.stats.following}
+                onClick={() => navigate(`/following/${profile.username}`)}
+              />
             </div>
           </div>
 
@@ -176,7 +208,9 @@ export default function ProfilePage() {
               {profile.isVerified && <span className="text-accent text-sm">✓</span>}
             </h1>
             {profile.bio ? (
-              <p className="text-gray-600 dark:text-gray-400 mt-1.5 text-sm leading-relaxed whitespace-pre-line">{profile.bio}</p>
+              <p className="text-gray-600 dark:text-gray-400 mt-1.5 text-sm leading-relaxed whitespace-pre-line">
+                {profile.bio}
+              </p>
             ) : (
               <p className="text-gray-400 mt-1.5 text-sm italic">No bio yet</p>
             )}
@@ -186,20 +220,28 @@ export default function ProfilePage() {
             {profile.isOwnProfile ? (
               <>
                 <Link to="/profile/edit" className="flex-1">
-                  <Button variant="secondary" className="w-full" size="sm">Edit Profile</Button>
+                  <Button variant="secondary" className="w-full" size="sm">
+                    Edit Profile
+                  </Button>
                 </Link>
                 <Link to="/settings">
-                  <Button variant="secondary" size="sm"><Settings className="w-4 h-4" /></Button>
+                  <Button variant="secondary" size="sm">
+                    <Settings className="w-4 h-4" />
+                  </Button>
                 </Link>
               </>
             ) : (
               <>
                 <Button size="sm" className="flex-1" onClick={handleFollow}>
-                  {profile.isFollowing
-                    ? 'Following'
-                    : profile.followRequestPending
-                      ? 'Requested'
-                      : <><UserPlus className="w-4 h-4" /> Follow</>}
+                  {profile.isFollowing ? (
+                    'Following'
+                  ) : profile.followRequestPending ? (
+                    'Requested'
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4" /> Follow
+                    </>
+                  )}
                 </Button>
                 {showRequestBtn ? (
                   <Button size="sm" variant="secondary" onClick={handleRequestChat} loading={messageLoading}>
@@ -219,7 +261,6 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Tabs */}
         <div className="flex border-b border-gray-200 dark:border-gray-800 px-2">
           {TABS.map(({ id, label, icon: Icon }) => (
             <button
@@ -238,42 +279,49 @@ export default function ProfilePage() {
         </div>
 
         <div className="px-4 space-y-4 pb-4">
-          {activeTab === 'posts' && (
-            posts.length === 0 ? (
+          {activeTab === 'posts' &&
+            (posts.length === 0 ? (
               <EmptyState title="No posts yet" subtitle="Share your first post from the home feed" />
             ) : (
               posts.map((p) => <PostCard key={p.id} post={p} />)
-            )
-          )}
+            ))}
 
-          {activeTab === 'clips' && (
-            clips.length === 0 ? (
+          {activeTab === 'clips' &&
+            (clips.length === 0 ? (
               <EmptyState
                 title="No clips yet"
-                subtitle={profile.isOwnProfile ? 'Upload a short video from the Clips tab' : 'No clips shared yet'}
-                action={profile.isOwnProfile ? { label: 'Create a clip →', to: '/clips' } : { label: 'Explore Clips →', to: '/clips' }}
+                subtitle={
+                  profile.isOwnProfile
+                    ? 'Upload a short video from the Clips tab'
+                    : 'No clips shared yet'
+                }
+                action={
+                  profile.isOwnProfile
+                    ? { label: 'Create a clip →', to: '/clips' }
+                    : { label: 'Explore Clips →', to: '/clips' }
+                }
               />
             ) : (
               clips.map((clip) => (
                 <ClipCard
                   key={clip.id}
                   clip={clip}
-                  onDeleted={() => setClips((prev) => prev.filter((c) => c.id !== clip.id))}
+                  onDeleted={() =>
+                    dispatch(removeProfileClip({ username: resolvedUsername, clipId: clip.id }))
+                  }
                 />
               ))
-            )
-          )}
+            ))}
 
-          {activeTab === 'tags' && (
-            taggedPosts.length === 0 ? (
+          {activeTab === 'tags' &&
+            (taggedPosts.length === 0 ? (
               <EmptyState
                 title="No tags yet"
                 subtitle="Posts where others mention you with @username will appear here"
               />
             ) : (
               taggedPosts.map((p) => <PostCard key={p.id} post={p} />)
-            )
-          )}
+            ))}
         </div>
       </div>
     </AppShell>
