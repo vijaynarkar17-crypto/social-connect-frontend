@@ -273,7 +273,7 @@ function PostCard({
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleComment()}
               placeholder="Write a comment..."
             />
-            <button onClick={handleComment} className="px-4 py-2 rounded-xl bg-primary bg-gradient-primary text-white text-sm active:scale-95 transition-transform shrink-0 mb-7">
+            <button onClick={handleComment} className="px-4 py-2 rounded-full bg-primary bg-gradient-primary text-black border-2 border-black font-semibold text-sm shadow-btn-yellow active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all shrink-0 mb-7">
               Post
             </button>
           </div>

@@ -291,7 +291,7 @@ export default function PostMenu({
                   type="button"
                   onClick={handleSaveEdit}
                   disabled={saving || editText.trim() === content.trim()}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-primary bg-gradient-primary text-white disabled:opacity-50 active:scale-95 transition-transform flex items-center justify-center gap-1.5"
+                  className="flex-1 py-2.5 rounded-full text-sm font-semibold bg-primary bg-gradient-primary text-black border-2 border-black shadow-btn-yellow disabled:opacity-50 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5"
                 >
                   {saving ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

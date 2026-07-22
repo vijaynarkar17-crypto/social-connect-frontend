@@ -10,23 +10,30 @@ export default {
       },
       colors: {
         primary: {
-          DEFAULT: 'rgb(var(--color-primary, 124 58 237) / <alpha-value>)',
-          dark: 'rgb(var(--color-primary-dark, 109 40 217) / <alpha-value>)',
-          light: 'rgb(var(--color-primary-light, 139 92 246) / <alpha-value>)',
+          DEFAULT: 'rgb(var(--color-primary, 250 204 21) / <alpha-value>)',
+          dark: 'rgb(var(--color-primary-dark, 202 138 4) / <alpha-value>)',
+          light: 'rgb(var(--color-primary-light, 253 224 71) / <alpha-value>)',
         },
-        accent: 'rgb(var(--color-accent, 59 130 246) / <alpha-value>)',
-        surface: { light: '#F8FAFC', dark: '#0F172A', card: '#FFFFFF', 'card-dark': '#1E293B' },
+        accent: 'rgb(var(--color-accent, 234 179 8) / <alpha-value>)',
+        surface: {
+          light: '#FAFAF5',
+          dark: '#0A0A0A',
+          card: '#FFFFFF',
+          'card-dark': '#141414',
+        },
       },
       backgroundImage: {
         'gradient-primary':
-          'var(--gradient-primary, linear-gradient(135deg, rgb(124, 58, 237) 0%, rgb(236, 72, 153) 100%))',
+          'var(--gradient-primary, linear-gradient(135deg, #FACC15 0%, #EAB308 55%, #CA8A04 100%))',
         'gradient-accent':
-          'var(--gradient-accent, linear-gradient(135deg, rgb(124, 58, 237) 0%, rgb(59, 130, 246) 100%))',
+          'var(--gradient-accent, linear-gradient(135deg, #111111 0%, #1a1a1a 40%, #FACC15 100%))',
       },
       boxShadow: {
-        glass: '0 8px 32px rgb(var(--color-primary, 124 58 237) / 0.12)',
-        card: '0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgb(var(--color-primary, 124 58 237) / 0.08)',
-        elevated: '0 8px 30px rgb(var(--color-primary, 124 58 237) / 0.15)',
+        glass: '0 8px 32px rgb(250 204 21 / 0.12)',
+        card: '0 1px 2px rgba(0,0,0,0.05), 0 4px 16px rgb(250 204 21 / 0.1)',
+        elevated: '0 8px 28px rgb(250 204 21 / 0.22)',
+        'btn-yellow': '3px 3px 0 0 #000',
+        'btn-black': '3px 3px 0 0 #FACC15',
       },
     },
   },

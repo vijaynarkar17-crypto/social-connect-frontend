@@ -38,8 +38,14 @@ export default function EditProfilePage() {
       const { url } = await uploadProfileImage(file, 'avatar');
       setAvatar(url);
       await refreshUser();
-    } catch {
-      setUploadError('Could not save profile photo. Try again.');
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number; data?: { error?: string } } })?.response?.status;
+      const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      if (status === 429) {
+        setUploadError('Too many requests — wait a few seconds, then try again.');
+      } else {
+        setUploadError(msg || 'Could not save profile photo. Try again.');
+      }
     } finally {
       setUploadingAvatar(false);
     }
@@ -52,8 +58,14 @@ export default function EditProfilePage() {
       const { url } = await uploadProfileImage(file, 'cover');
       setCover(url);
       await refreshUser();
-    } catch {
-      setUploadError('Could not save cover photo. Try again.');
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number; data?: { error?: string } } })?.response?.status;
+      const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      if (status === 429) {
+        setUploadError('Too many requests — wait a few seconds, then try again.');
+      } else {
+        setUploadError(msg || 'Could not save cover photo. Try again.');
+      }
     } finally {
       setUploadingCover(false);
     }

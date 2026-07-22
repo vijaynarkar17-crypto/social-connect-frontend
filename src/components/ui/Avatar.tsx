@@ -26,7 +26,7 @@ function Avatar({ src, alt = '', size = 'md', className }: { src?: string | null
     );
   }
   return (
-    <div className={clsx('rounded-full bg-primary bg-gradient-primary flex items-center justify-center text-white font-semibold flex-shrink-0', sizes[size], className)}>
+    <div className={clsx('rounded-full bg-primary bg-gradient-primary flex items-center justify-center text-black font-semibold flex-shrink-0 border border-black/20', sizes[size], className)}>
       {initials}
     </div>
   );

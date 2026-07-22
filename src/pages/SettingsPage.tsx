@@ -92,7 +92,7 @@ export default function SettingsPage() {
             <button
               onClick={() => setTheme('light')}
               className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition-all active:scale-95 ${
-                theme === 'light' ? 'bg-primary bg-gradient-primary text-white shadow-md' : 'bg-gray-100 dark:bg-gray-800'
+                theme === 'light' ? 'bg-primary bg-gradient-primary text-black border-2 border-black shadow-btn-yellow' : 'bg-gray-100 dark:bg-gray-800 border-2 border-transparent'
               }`}
             >
               <Sun className="w-4 h-4" /> Light
@@ -100,7 +100,7 @@ export default function SettingsPage() {
             <button
               onClick={() => setTheme('dark')}
               className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition-all active:scale-95 ${
-                theme === 'dark' ? 'bg-primary bg-gradient-primary text-white shadow-md' : 'bg-gray-100 dark:bg-gray-800'
+                theme === 'dark' ? 'bg-primary bg-gradient-primary text-black border-2 border-black shadow-btn-yellow' : 'bg-gray-100 dark:bg-gray-800 border-2 border-transparent'
               }`}
             >
               <Moon className="w-4 h-4" /> Dark

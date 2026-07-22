@@ -191,7 +191,7 @@ function ClipCard({
         <button
           type="button"
           onClick={() => setMuted((value) => !value)}
-          className="absolute top-3 right-3 z-20 w-9 h-9 rounded-full bg-black/40 flex items-center justify-center text-white"
+          className="absolute top-3 left-14 z-20 w-9 h-9 rounded-full bg-black/40 flex items-center justify-center text-white"
           aria-label={muted ? 'Unmute clip' : 'Mute clip'}
         >
           {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
@@ -268,7 +268,7 @@ function ClipCard({
           onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleComment()}
           placeholder="Add a comment..."
         />
-        <button onClick={handleComment} className="px-4 py-2 rounded-xl bg-primary bg-gradient-primary text-white text-sm shrink-0 mb-7">
+        <button onClick={handleComment} className="px-4 py-2 rounded-full bg-primary bg-gradient-primary text-black border-2 border-black font-semibold text-sm shadow-btn-yellow shrink-0 mb-7">
           Post
         </button>
       </div>
@@ -292,7 +292,7 @@ function ClipCard({
           onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleComment()}
           placeholder="Add a comment..."
         />
-        <button onClick={handleComment} className="px-4 py-2 rounded-xl bg-primary bg-gradient-primary text-white text-sm shrink-0 mb-7">
+        <button onClick={handleComment} className="px-4 py-2 rounded-full bg-primary bg-gradient-primary text-black border-2 border-black font-semibold text-sm shadow-btn-yellow shrink-0 mb-7">
           Post
         </button>
       </div>

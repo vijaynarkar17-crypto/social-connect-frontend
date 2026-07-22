@@ -269,7 +269,7 @@ export default function HomeFeed({ cameraEnabled = true, onSwipeToMessages }: Ho
         <button
           type="button"
           onClick={() => setCreateMenuOpen(true)}
-          className="fixed right-4 bottom-24 z-40 w-14 h-14 rounded-full bg-primary bg-gradient-primary text-white shadow-lg shadow-primary/30 flex items-center justify-center active:scale-95 transition-transform"
+          className="fixed right-4 bottom-24 z-40 w-14 h-14 rounded-full bg-primary bg-gradient-primary text-black border-2 border-black shadow-btn-yellow flex items-center justify-center hover:shadow-[1px_1px_0_0_#000] hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none active:translate-x-1 active:translate-y-1 transition-all"
           aria-label="Create post, photo, clip or story"
         >
           <Plus className="w-7 h-7" />

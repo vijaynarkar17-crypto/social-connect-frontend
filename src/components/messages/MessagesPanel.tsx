@@ -451,7 +451,7 @@ export default function MessagesPanel({
                         </p>
                       </div>
                       {unreadCount > 0 && (
-                        <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center">
+                        <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-black border border-black/30 text-[10px] font-bold flex items-center justify-center">
                           {unreadCount > 9 ? '9+' : unreadCount}
                         </span>
                       )}

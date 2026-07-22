@@ -73,7 +73,7 @@ export default function ChatMessageBubble({
         ref={bubbleRef}
         className={`max-w-[88%] rounded-2xl px-3 py-2 text-sm space-y-2 select-none touch-manipulation ${
           isMine
-            ? 'bg-primary text-white rounded-br-md'
+            ? 'bg-primary text-black rounded-br-md border border-black/20'
             : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-md'
         }`}
         onTouchStart={startLongPress}

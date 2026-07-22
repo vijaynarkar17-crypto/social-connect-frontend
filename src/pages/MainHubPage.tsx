@@ -76,7 +76,7 @@ export default function MainHubPage() {
         <motion.div
           className="flex w-[300%] h-full min-h-0"
           animate={{ x: `-${panelIndex * (100 / 3)}%` }}
-          transition={{ type: 'spring', damping: 32, stiffness: 320 }}
+          transition={{ type: 'tween', ease: [0.22, 1, 0.36, 1], duration: 0.28 }}
         >
           <div className="w-1/3 shrink-0 h-full min-h-0 overflow-hidden flex flex-col">
             {mounted.home && (

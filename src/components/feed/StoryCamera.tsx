@@ -435,7 +435,7 @@ export default function StoryCamera({
                     key={e.id}
                     onClick={() => setEffect(e.id)}
                     className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium ${
-                      effect === e.id ? 'bg-primary text-white' : 'bg-white/15 text-white'
+                      effect === e.id ? 'bg-primary text-black border border-black font-semibold' : 'bg-white/15 text-white'
                     }`}
                   >
                     {e.label}

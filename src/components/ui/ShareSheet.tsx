@@ -169,7 +169,7 @@ export default function ShareSheet({ open, onClose, postId, postPreview, onShare
                           className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95 disabled:opacity-80 ${
                             sent
                               ? 'bg-green-500 text-white'
-                              : 'bg-primary bg-gradient-primary text-white group-hover:scale-110 group-hover:shadow-lg'
+                              : 'bg-primary bg-gradient-primary text-black border border-black group-hover:scale-110 group-hover:shadow-btn-yellow'
                           }`}
                         >
                           {sent ? <Check className="w-5 h-5" /> : <Send className="w-4 h-4" />}

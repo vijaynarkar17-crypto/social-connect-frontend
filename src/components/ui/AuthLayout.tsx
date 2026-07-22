@@ -14,7 +14,7 @@ export default function AuthLayout({ children, title, subtitle }: { children: Re
   return (
     <div className="min-h-screen flex">
       <div className="hidden lg:flex lg:w-[45%] auth-mesh relative overflow-hidden p-12 flex-col justify-between">
-        <Logo size="md" className="[&_span]:!text-white [&_span]:!bg-none" />
+        <Logo size="md" className="[&_.gradient-text]:!text-primary [&_.gradient-text]:!bg-none" />
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
           <div>
             <h2 className="text-4xl font-bold text-white leading-tight">Your world,<br />connected beautifully.</h2>
