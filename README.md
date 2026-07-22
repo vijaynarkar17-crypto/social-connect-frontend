@@ -2,7 +2,9 @@
 
 Standalone React + TypeScript + Vite app.
 
-**Repository:** [social-connect-frontend](https://github.com/vijaynarkar17-crypto/social-connect-frontend)
+**Owner:** [vijaynarkar17-crypto](https://github.com/vijaynarkar17-crypto)  
+**Repository:** [social-connect-frontend](https://github.com/vijaynarkar17-crypto/social-connect-frontend)  
+**License:** All Rights Reserved — see [LICENSE](./LICENSE). Viewing for evaluation is allowed; copying or claiming ownership is not.
 
 This is an **independent project**. Open this folder alone in your editor — not the parent directory.
 
